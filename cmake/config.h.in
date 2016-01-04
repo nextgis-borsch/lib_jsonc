@@ -24,51 +24,51 @@
 #endif
 
 /* Define to 1 if you have the <fcntl.h> header file. */
-#cmakedefine01 HAVE_FCNTL_H
+#cmakedefine HAVE_FCNTL_H 1
 
 /* Define to 1 if you have the <inttypes.h> header file. */
-#cmakedefine01 HAVE_INTTYPES_H
+#cmakedefine HAVE_INTTYPES_H 1
 
 /* Define to 1 if you have the `open' function. */
-#cmakedefine01 HAVE_OPEN
+#cmakedefine HAVE_OPEN 1
 
 /* Define to 1 if your system has a GNU libc compatible `realloc' function,
    and to 0 otherwise. */
-#cmakedefine01 HAVE_REALLOC
+#cmakedefine HAVE_REALLOC 1
 
 /* Define to 1 if you have the `snprintf' function. */
-#cmakedefine01 HAVE_SNPRINTF
+#cmakedefine HAVE_SNPRINTF 1
 
 /* Define to 1 if you have the `strdup' function. */
-#cmakedefine01 HAVE_STRDUP
+#cmakedefine HAVE_STRDUP 1
 
 /* Define to 1 if you have the <stdarg.h> header file. */
-#cmakedefine01 HAVE_STDARG_H
+#cmakedefine HAVE_STDARG_H 1
 
 /* Define to 1 if you have the <strings.h> header file. */
-#cmakedefine01 HAVE_STRINGS_H
+#cmakedefine HAVE_STRINGS_H 1
 
 /* Define to 1 if you have the <syslog.h> header file. */
-#cmakedefine01 HAVE_SYSLOG_H
+#cmakedefine HAVE_SYSLOG_H 1
 
 /* Define to 1 if you have the <sys/param.h> header file. */
-#cmakedefine01 HAVE_SYS_PARAM_H
+#cmakedefine HAVE_SYS_PARAM_H 1
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
-#cmakedefine01 HAVE_SYS_STAT_H
+#cmakedefine HAVE_SYS_STAT_H 1
 
 /* Define to 1 if you have the <sys/types.h> header file. */
-#cmakedefine01 HAVE_SYS_TYPES_H
+#cmakedefine HAVE_SYS_TYPES_H 1
 
 /* Define to 1 if you have the <unistd.h> header file. */
-#cmakedefine01 HAVE_UNISTD_H
+#cmakedefine HAVE_UNISTD_H 1
 
 /* Define to 1 if you have the `vsyslog' function. */
-#cmakedefine01 HAVE_VSYSLOG
+#cmakedefine HAVE_VSYSLOG 1
 
 /* Define to 1 if you have the `strncasecmp' function. */
 #ifndef HAVE_STRNCASECMP
-#cmakedefine01 HAVE_STRNCASECMP
+#cmakedefine HAVE_STRNCASECMP 1
 #endif
 
 #if defined(_MSC_VER) && !defined(strncasecmp)
@@ -77,4 +77,5 @@
 #endif
 
 /* Define to 1 if you have the ANSI C header files. */
-#cmakedefine01 STDC_HEADERS
+#cmakedefine STDC_HEADERS 1
+
