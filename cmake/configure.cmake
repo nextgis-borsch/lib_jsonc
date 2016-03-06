@@ -63,3 +63,4 @@ check_function_exists(snprintf HAVE_SNPRINTF)
 
 configure_file(${CMAKE_MODULE_PATH}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h @ONLY)
 configure_file(${CMAKE_MODULE_PATH}/json_config.h.in ${CMAKE_CURRENT_BINARY_DIR}/json_config.h @ONLY)
+configure_file(${CMAKE_MODULE_PATH}/uninstall.cmake.in ${CMAKE_BINARY_DIR}/cmake_uninstall.cmake IMMEDIATE @ONLY)

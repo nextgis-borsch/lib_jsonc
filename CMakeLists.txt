@@ -3,7 +3,7 @@
 # Purpose:  CMake build scripts
 # Author:   Dmitry Baryshnikov, polimax@mail.ru
 ################################################################################
-# Copyright (C) 2015, NextGIS <info@nextgis.com>
+# Copyright (C) 2015-2016, NextGIS <info@nextgis.com>
 # Copyright (C) 2012,2013,2014 Dmitry Baryshnikov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
@@ -24,48 +24,30 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 ################################################################################
-cmake_minimum_required (VERSION 2.8.10 FATAL_ERROR)
+cmake_minimum_required (VERSION 2.8.12 FATAL_ERROR)
 
-# main settings
-set(PROJECT_NAME "jsonc")
-project(${PROJECT_NAME})
+project(json-c)
 
 # some init settings
 set(CMAKE_COLOR_MAKEFILE ON)
-set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "Configs" FORCE)
+# set path to additional CMake modules
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
+
+set(INSTALL_BIN_DIR "${CMAKE_INSTALL_PREFIX}/bin" CACHE INTERNAL "Installation directory for executables" FORCE)
+set(INSTALL_LIB_DIR "${CMAKE_INSTALL_PREFIX}/lib" CACHE INTERNAL "Installation directory for libraries" FORCE)
+set(INSTALL_INC_DIR "${CMAKE_INSTALL_PREFIX}/include/${PROJECT_NAME}" CACHE INTERNAL "Installation directory for headers" FORCE)
+
+# setup package meta-data
+include(util)
+
+check_version(JSON_C_MAJOR_VERSION JSON_C_MINOR_VERSION JSON_C_REV_VERSION)
+set(VERSION ${JSON_C_MAJOR_VERSION}.${JSON_C_MINOR_VERSION}.${JSON_C_REV_VERSION})
+
+report_version(${PROJECT_NAME} ${VERSION})  
 
 # setup paths
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
-
-# set path to additional CMake modules
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
-
-# read and report version
-file(READ ${CMAKE_CURRENT_SOURCE_DIR}/json_c_version.h JSONC_VERSION_H_CONTENTS)
-string(REGEX MATCH "JSON_C_MAJOR_VERSION[ \t]+([0-9]+)"
-  JSON_C_MAJOR_VERSION ${JSONC_VERSION_H_CONTENTS})
-string (REGEX MATCH "([0-9]+)"
-  JSON_C_MAJOR_VERSION ${JSON_C_MAJOR_VERSION})
-string(REGEX MATCH "JSON_C_MINOR_VERSION[ \t]+([0-9]+)"
-  JSON_C_MINOR_VERSION ${JSONC_VERSION_H_CONTENTS})
-string (REGEX MATCH "([0-9]+)"
-  JSON_C_MINOR_VERSION ${JSON_C_MINOR_VERSION})
-
-string(REGEX MATCH "JSON_C_MICRO_VERSION[ \t]+([0-9]+)"
-  JSON_C_MICRO_VERSION ${JSONC_VERSION_H_CONTENTS})
-string (REGEX MATCH "([0-9]+)"
-  JSON_C_MICRO_VERSION ${JSON_C_MICRO_VERSION})
-
-set(JSON_C_VERSION ${JSON_C_MAJOR_VERSION}.${JSON_C_MINOR_VERSION})
-message(STATUS "json-c version=[${JSON_C_VERSION}]")
-
-if(WIN32)
-    set(JSON_C_LIB_NAME jsonc${JSON_C_MAJOR_VERSION}${JSON_C_MINOR_VERSION})
-elseif(UNIX)
-    set(JSON_C_LIB_NAME jsonc)
-endif()
-message(STATUS "jsonc lib name ... " ${JSON_C_LIB_NAME})
 
 include(configure)
 
@@ -83,6 +65,9 @@ set(HHEADERS
     json_util.h
     linkhash.h
     printbuf.h
+)
+
+set(HHEADERS_PRIV    
     symbol_renames.h
 )
 
@@ -98,27 +83,43 @@ set(CSOURCES
     printbuf.c
 )
 
-# create library
-option(JSON_C_BUILD_SHARED "Set ON to build shared library" ON)
-if(JSON_C_BUILD_SHARED)
-    add_library(${JSON_C_LIB_NAME} SHARED ${HHEADERS} ${CSOURCES})
-else(JSON_C_BUILD_SHARED)
-    add_library(${JSON_C_LIB_NAME} STATIC ${HHEADERS} ${CSOURCES})
-endif(JSON_C_BUILD_SHARED)
+set(LIB_NAME)
+if(BUILD_SHARED_LIBS)
+    set(LIB_TYPE SHARED)
+    set(LIB_NAME ${PROJECT_NAME})
+else()
+    set(LIB_TYPE STATIC)
+    set(LIB_NAME ${PROJECT_NAME}static)
+endif()
 
-set_target_properties(${JSON_C_LIB_NAME}
-    PROPERTIES PROJECT_LABEL ${PROJECT_NAME}
-    VERSION ${JSON_C_VERSION}
-    SOVERSION 1
-    ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    )
+add_library(${LIB_NAME} ${LIB_TYPE} ${CSOURCES} ${HHEADERS} ${HHEADERS_PRIV})
 
-#install lib and bin
+if(BUILD_SHARED_LIBS)
+    if(WIN32)
+        set (LIB_VERSION ${JSON_C_MAJOR_VERSION})
+        if(MSVC)        
+            set_target_properties(${LIB_NAME} PROPERTIES IMPORT_SUFFIX "_i.lib")
+        endif()
+    else ()
+        set (LIB_VERSION ${VERSION})
+    endif()    
+    set_target_properties (${LIB_NAME} PROPERTIES VERSION ${LIB_VERSION})
+    set_target_properties (${LIB_NAME} PROPERTIES SOVERSION ${LIB_VERSION})
+endif()
 
-install(TARGETS ${JSON_C_LIB_NAME}
-        RUNTIME DESTINATION bin
-        ARCHIVE DESTINATION lib
-        LIBRARY DESTINATION lib
-    )
+
+export(TARGETS ${LIB_NAME} FILE ${LIB_NAME}-exports.cmake EXPORT_LINK_INTERFACE_LIBRARIES)
+
+install(TARGETS ${LIB_NAME} RUNTIME DESTINATION ${INSTALL_BIN_DIR} COMPONENT libraries
+                      LIBRARY DESTINATION ${INSTALL_LIB_DIR} COMPONENT libraries
+                      ARCHIVE DESTINATION ${INSTALL_LIB_DIR} COMPONENT libraries)
+                      
+
+# install headers
+if(NOT SKIP_INSTALL_HEADERS AND NOT SKIP_INSTALL_ALL )
+    install(FILES ${HHEADERS} DESTINATION ${INSTALL_INC_DIR} COMPONENT headers)
+endif()
+
+# uninstall
+add_custom_target(uninstall COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+
