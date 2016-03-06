@@ -64,10 +64,7 @@ set(HHEADERS
     json_tokener.h
     json_util.h
     linkhash.h
-    printbuf.h
-)
-
-set(HHEADERS_PRIV    
+    printbuf.h 
     symbol_renames.h
 )
 
@@ -92,7 +89,7 @@ else()
     set(LIB_NAME ${PROJECT_NAME}static)
 endif()
 
-add_library(${LIB_NAME} ${LIB_TYPE} ${CSOURCES} ${HHEADERS} ${HHEADERS_PRIV})
+add_library(${LIB_NAME} ${LIB_TYPE} ${CSOURCES} ${HHEADERS})
 
 if(BUILD_SHARED_LIBS)
     if(WIN32)
