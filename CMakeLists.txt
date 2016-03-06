@@ -52,6 +52,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include(configure)
 
 set(HHEADERS
+    ${CMAKE_CURRENT_BINARY_DIR}/json_config.h
     arraylist.h
     bits.h
     debug.h
