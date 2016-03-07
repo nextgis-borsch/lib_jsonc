@@ -10,11 +10,16 @@
  *
  */
 
-#ifndef json_object_h_
-#define json_object_h_
+#ifndef _json_object_h_
+#define _json_object_h_
 
-#include "symbol_renames.h"
-#include "cpl_port.h"
+#ifdef __GNUC__
+#define THIS_FUNCTION_IS_DEPRECATED(func) func __attribute__ ((deprecated))
+#elif defined(_MSC_VER)
+#define THIS_FUNCTION_IS_DEPRECATED(func) __declspec(deprecated) func
+#else
+#define THIS_FUNCTION_IS_DEPRECATED(func) func
+#endif
 
 #include "json_inttypes.h"
 
@@ -46,9 +51,52 @@ extern "C" {
  */
 #define JSON_C_TO_STRING_PRETTY     (1<<1)
 /**
+ * A flag for the json_object_to_json_string_ext() and
+ * json_object_to_file_ext() functions which causes
+ * the output to be formatted.
+ *
+ * Instead of a "Two Space Tab" this gives a single tab character.
+ */
+#define JSON_C_TO_STRING_PRETTY_TAB (1<<3)
+/**
  * A flag to drop trailing zero for float values
  */
 #define JSON_C_TO_STRING_NOZERO     (1<<2)
+
+/**
+ * Don't escape forward slashes.
+ */
+#define JSON_C_TO_STRING_NOSLASHESCAPE (1<<4)
+
+/**
+ * A flag for the json_object_object_add_ex function which
+ * causes the value to be added without a check if it already exists.
+ * Note: it is the responsibilty of the caller to ensure that no
+ * key is added multiple times. If this is done, results are
+ * unpredictable. While this option is somewhat dangerous, it
+ * permits potentially large performance savings in code that
+ * knows for sure the key values are unique (e.g. because the
+ * code adds a well-known set of constant key values).
+ */
+#define JSON_C_OBJECT_ADD_KEY_IS_NEW (1<<1)
+/**
+ * A flag for the json_object_object_add_ex function which
+ * flags the key as being constant memory. This means that
+ * the key will NOT be copied via strdup(), resulting in a
+ * potentially huge performance win (malloc, strdup and
+ * free are usually performance hogs). It is acceptable to
+ * use this flag for keys in non-constant memory blocks if
+ * the caller ensure that the memory holding the key lives
+ * longer than the corresponding json object. However, this
+ * is somewhat dangerous and should only be done if really
+ * justified.
+ * The general use-case for this flag is cases where the
+ * key is given as a real constant value in the function
+ * call, e.g. as in
+ *   json_object_object_add_ex(obj, "ip", json,
+ *       JSON_C_OBJECT_KEY_IS_CONSTANT);
+ */
+#define JSON_C_OBJECT_KEY_IS_CONSTANT (1<<2)
 
 #undef FALSE
 #define FALSE ((json_bool)0)
@@ -100,13 +148,13 @@ typedef enum json_type {
   json_type_int,
   json_type_object,
   json_type_array,
-  json_type_string,
+  json_type_string
 } json_type;
 
 /* reference counting functions */
 
 /**
- * Increment the reference count of json_object, thereby grabbing shared 
+ * Increment the reference count of json_object, thereby grabbing shared
  * ownership of obj.
  *
  * @param obj the json_object instance
@@ -121,7 +169,7 @@ extern struct json_object* json_object_get(struct json_object *obj);
  * @param obj the json_object instance
  * @returns 1 if the object was freed.
  */
-int CPL_DLL json_object_put(struct json_object *obj);
+int json_object_put(struct json_object *obj);
 
 /**
  * Check if the json_object is of a given type
@@ -133,9 +181,9 @@ int CPL_DLL json_object_put(struct json_object *obj);
      json_type_int,
      json_type_object,
      json_type_array,
-     json_type_string,
+     json_type_string
  */
-extern int json_object_is_type(struct json_object *obj, enum json_type type);
+extern int json_object_is_type(const struct json_object *obj, enum json_type type);
 
 /**
  * Get the type of the json_object.  See also json_type_to_name() to turn this
@@ -149,31 +197,36 @@ extern int json_object_is_type(struct json_object *obj, enum json_type type);
      json_type_int,
      json_type_object,
      json_type_array,
-     json_type_string,
+     json_type_string
  */
-extern enum json_type json_object_get_type(struct json_object *obj);
+extern enum json_type json_object_get_type(const struct json_object *obj);
 
 
 /** Stringify object to json format.
  * Equivalent to json_object_to_json_string_ext(obj, JSON_C_TO_STRING_SPACED)
+ * The pointer you get is an internal of your json object. You don't
+ * have to free it, later use of json_object_put() should be sufficient.
+ * If you can not ensure there's no concurrent access to *obj use
+ * strdup().
  * @param obj the json_object instance
  * @returns a string in JSON format
  */
 extern const char* json_object_to_json_string(struct json_object *obj);
 
 /** Stringify object to json format
+ * @see json_object_to_json_string() for details on how to free string.
  * @param obj the json_object instance
  * @param flags formatting options, see JSON_C_TO_STRING_PRETTY and other constants
  * @returns a string in JSON format
  */
-extern const char CPL_DLL* json_object_to_json_string_ext(struct json_object *obj, int
+extern const char* json_object_to_json_string_ext(struct json_object *obj, int
 flags);
 
 /**
  * Set a custom serialization function to be used when this particular object
  * is converted to a string by json_object_to_json_string.
  *
- * If a custom serializer is already set on this object, any existing 
+ * If a custom serializer is already set on this object, any existing
  * user_delete function is called before the new one is set.
  *
  * If to_string_func is NULL, the other parameters are ignored
@@ -195,11 +248,30 @@ flags);
  * @param userdata an optional opaque cookie
  * @param user_delete an optional function from freeing userdata
  */
-/* GDAL added */ extern void json_object_set_serializer(json_object *jso,
+extern void json_object_set_serializer(json_object *jso,
 	json_object_to_json_string_fn to_string_func,
 	void *userdata,
 	json_object_delete_fn *user_delete);
 
+/**
+ * Simply call free on the userdata pointer.
+ * Can be used with json_object_set_serializer().
+ *
+ * @param jso unused
+ * @param userdata the pointer that is passed to free().
+ */
+json_object_delete_fn json_object_free_userdata;
+
+/**
+ * Copy the jso->_userdata string over to pb as-is.
+ * Can be used with json_object_set_serializer().
+ *
+ * @param jso The object whose _userdata is used.
+ * @param pb The destination buffer.
+ * @param level Ignored.
+ * @param flags Ignored.
+ */
+json_object_to_json_string_fn json_object_userdata_to_json_string;
 
 
 /* object type methods */
@@ -214,18 +286,18 @@ flags);
  *
  * @returns a json_object of type json_type_object
  */
-extern struct json_object CPL_DLL* json_object_new_object(void);
+extern struct json_object* json_object_new_object(void);
 
 /** Get the hashtable of a json_object of type json_type_object
  * @param obj the json_object instance
  * @returns a linkhash
  */
-extern struct lh_table* json_object_get_object(struct json_object *obj);
+extern struct lh_table* json_object_get_object(const struct json_object *obj);
 
 /** Get the size of an object in terms of the number of fields it has.
  * @param obj the json_object whose length to return
  */
-extern int json_object_object_length(struct json_object* obj);
+extern int json_object_object_length(const struct json_object* obj);
 
 /** Add an object field to a json_object of type json_type_object
  *
@@ -242,9 +314,28 @@ extern int json_object_object_length(struct json_object* obj);
  * @param obj the json_object instance
  * @param key the object field name (a private copy will be duplicated)
  * @param val a json_object or NULL member to associate with the given field
+ *
+ * @return On success, <code>0</code> is returned.
+ * 	On error, a negative value is returned.
  */
-extern void CPL_DLL json_object_object_add(struct json_object* obj, const char *key,
+extern int json_object_object_add(struct json_object* obj, const char *key,
 				   struct json_object *val);
+
+/** Add an object field to a json_object of type json_type_object
+ *
+ * The semantics are identical to json_object_object_add, except that an
+ * additional flag fields gives you more control over some detail aspects
+ * of processing. See the description of JSON_C_OBJECT_ADD_* flags for more
+ * details.
+ *
+ * @param obj the json_object instance
+ * @param key the object field name (a private copy will be duplicated)
+ * @param val a json_object or NULL member to associate with the given field
+ * @param opts process-modifying options. To specify multiple options, use 
+ *             arithmetic or (OPT1|OPT2)
+ */
+extern void json_object_object_add_ex(struct json_object* obj, const char *key,
+				   struct json_object *val, const unsigned opts);
 
 /** Get the json_object associate with a given object field
  *
@@ -261,13 +352,14 @@ extern void CPL_DLL json_object_object_add(struct json_object* obj, const char *
  * @param obj the json_object instance
  * @param key the object field name
  * @returns the json_object associated with the given field name
+ * @deprecated Please use json_object_object_get_ex
  */
-extern struct json_object* json_object_object_get(struct json_object* obj,
-						  const char *key);
+THIS_FUNCTION_IS_DEPRECATED(extern struct json_object* json_object_object_get(const struct json_object* obj,
+						  const char *key));
 
-/** Get the json_object associated with a given object field.  
+/** Get the json_object associated with a given object field.
  *
- * This returns true if the key is found, false in all other cases (including 
+ * This returns true if the key is found, false in all other cases (including
  * if obj isn't a json_type_object).
  *
  * *No* reference counts will be changed.  There is no need to manually adjust
@@ -277,15 +369,15 @@ extern struct json_object* json_object_object_get(struct json_object* obj,
  *
  * @param obj the json_object instance
  * @param key the object field name
- * @param value a pointer where to store a reference to the json_object 
+ * @param value a pointer where to store a reference to the json_object
  *              associated with the given field name.
  *
  *              It is safe to pass a NULL value.
  * @returns whether or not the key exists
  */
-extern json_bool json_object_object_get_ex(struct json_object* obj,
-						  const char *key,
-                                                  struct json_object **value);
+extern json_bool json_object_object_get_ex(const struct json_object* obj,
+                                           const char *key,
+                                           struct json_object **value);
 
 /** Delete the given json_object field
  *
@@ -314,8 +406,8 @@ extern void json_object_object_del(struct json_object* obj, const char *key);
 #if defined(__GNUC__) && !defined(__STRICT_ANSI__) && __STDC_VERSION__ >= 199901L
 
 # define json_object_object_foreach(obj,key,val) \
-	char *key; \
-	struct json_object *val __attribute__((__unused__)); \
+	char *key = NULL; \
+	struct json_object *val __attribute__((__unused__)) = NULL; \
 	for(struct lh_entry *entry ## key = json_object_get_object(obj)->head, *entry_next ## key = NULL; \
 		({ if(entry ## key) { \
 			key = (char*)entry ## key->k; \
@@ -346,26 +438,26 @@ extern void json_object_object_del(struct json_object* obj, const char *key);
  * @param iter the object iterator
  */
 #define json_object_object_foreachC(obj,iter) \
- for(iter.entry = json_object_get_object(obj)->head; (iter.entry ? (iter.key = (char*)iter.entry->k, iter.val = (struct json_object*)iter.entry->v, 1) : 0); iter.entry = iter.entry->next)
+ for(iter.entry = json_object_get_object(obj)->head; (iter.entry ? (iter.key = (char*)iter.entry->k, iter.val = (struct json_object*)iter.entry->v, iter.entry) : 0); iter.entry = iter.entry->next)
 
 /* Array type methods */
 
 /** Create a new empty json_object of type json_type_array
  * @returns a json_object of type json_type_array
  */
-extern struct json_object CPL_DLL * json_object_new_array(void);
+extern struct json_object* json_object_new_array(void);
 
 /** Get the arraylist of a json_object of type json_type_array
  * @param obj the json_object instance
  * @returns an arraylist
  */
-extern struct array_list* json_object_get_array(struct json_object *obj);
+extern struct array_list* json_object_get_array(const struct json_object *obj);
 
 /** Get the length of a json_object of type json_type_array
  * @param obj the json_object instance
  * @returns an int
  */
-extern int json_object_array_length(struct json_object *obj);
+extern int json_object_array_length(const struct json_object *obj);
 
 /** Sorts the elements of jso of type json_type_array
 *
@@ -377,6 +469,25 @@ extern int json_object_array_length(struct json_object *obj);
 */
 extern void json_object_array_sort(struct json_object *jso, int(*sort_fn)(const void *, const void *));
 
+/** Binary search a sorted array for a specified key object.
+ *
+ * It depends on your compare function what's sufficient as a key.
+ * Usually you create some dummy object with the parameter compared in
+ * it, to identify the right item you're actually looking for.
+ *
+ * @see json_object_array_sort() for hints on the compare function.
+ *
+ * @param key a dummy json_object with the right key
+ * @param jso the array object we're searching
+ * @param sort_fn the sort/compare function
+ *
+ * @return the wanted json_object instance
+ */
+extern struct json_object* json_object_array_bsearch(
+		const struct json_object *key,
+		const struct json_object *jso,
+		int (*sort_fn)(const void *, const void *));
+
 /** Add an element to the end of a json_object of type json_type_array
  *
  * The reference count will *not* be incremented. This is to make adding
@@ -386,7 +497,7 @@ extern void json_object_array_sort(struct json_object *jso, int(*sort_fn)(const 
  * @param obj the json_object instance
  * @param val the json_object to be added
  */
-extern int CPL_DLL json_object_array_add(struct json_object *obj,
+extern int json_object_array_add(struct json_object *obj,
 				 struct json_object *val);
 
 /** Insert or replace an element at a specified index in an array (a json_object of type json_type_array)
@@ -407,18 +518,18 @@ extern int CPL_DLL json_object_array_add(struct json_object *obj,
 extern int json_object_array_put_idx(struct json_object *obj, int idx,
 				     struct json_object *val);
 
-/** Get the element at specified index of the array (a json_object of type json_type_array)
+/** Get the element at specificed index of the array (a json_object of type json_type_array)
  * @param obj the json_object instance
  * @param idx the index to get the element at
  * @returns the json_object at the specified index (or NULL)
  */
-extern struct json_object* json_object_array_get_idx(struct json_object *obj,
+extern struct json_object* json_object_array_get_idx(const struct json_object *obj,
 						     int idx);
 
 /* json_bool type methods */
 
 /** Create a new empty json_object of type json_type_boolean
- * @param b a json_bool TRUE or FALSE (0 or 1)
+ * @param b a json_bool TRUE or FALSE (1 or 0)
  * @returns a json_object of type json_type_boolean
  */
 extern struct json_object* json_object_new_boolean(json_bool b);
@@ -434,7 +545,7 @@ extern struct json_object* json_object_new_boolean(json_bool b);
  * @param obj the json_object instance
  * @returns a json_bool
  */
-extern json_bool json_object_get_boolean(struct json_object *obj);
+extern json_bool json_object_get_boolean(const struct json_object *obj);
 
 
 /* int type methods */
@@ -445,14 +556,14 @@ extern json_bool json_object_get_boolean(struct json_object *obj);
  * @param i the integer
  * @returns a json_object of type json_type_int
  */
-extern struct json_object CPL_DLL* json_object_new_int(int32_t i);
+extern struct json_object* json_object_new_int(int32_t i);
 
 
 /** Create a new empty json_object of type json_type_int
  * @param i the integer
  * @returns a json_object of type json_type_int
  */
-extern struct json_object CPL_DLL* json_object_new_int64(int64_t i);
+extern struct json_object* json_object_new_int64(int64_t i);
 
 
 /** Get the int value of a json_object
@@ -469,7 +580,7 @@ extern struct json_object CPL_DLL* json_object_new_int64(int64_t i);
  * @param obj the json_object instance
  * @returns an int
  */
-extern int32_t json_object_get_int(struct json_object *obj);
+extern int32_t json_object_get_int(const struct json_object *obj);
 
 /** Get the int value of a json_object
  *
@@ -484,7 +595,7 @@ extern int32_t json_object_get_int(struct json_object *obj);
  * @param obj the json_object instance
  * @returns an int64
  */
-extern int64_t json_object_get_int64(struct json_object *obj);
+extern int64_t json_object_get_int64(const struct json_object *obj);
 
 
 /* double type methods */
@@ -493,7 +604,30 @@ extern int64_t json_object_get_int64(struct json_object *obj);
  * @param d the double
  * @returns a json_object of type json_type_double
  */
-extern struct json_object CPL_DLL* json_object_new_double(double d);
+extern struct json_object* json_object_new_double(double d);
+
+/**
+ * Create a new json_object of type json_type_double, using
+ * the exact serialized representation of the value.
+ *
+ * This allows for numbers that would otherwise get displayed
+ * inefficiently (e.g. 12.3 => "12.300000000000001") to be
+ * serialized with the more convenient form.
+ *
+ * Note: this is used by json_tokener_parse_ex() to allow for
+ *   an exact re-serialization of a parsed object.
+ *
+ * An equivalent sequence of calls is:
+ * @code
+ *   jso = json_object_new_double(d);
+ *   json_object_set_serializer(d, json_object_userdata_to_json_string,
+ *       strdup(ds), json_object_free_userdata)
+ * @endcode
+ *
+ * @param d the numeric value of the double.
+ * @param ds the string representation of the double.  This will be copied.
+ */
+extern struct json_object* json_object_new_double_s(double d, const char *ds);
 
 /** Get the double floating point value of a json_object
  *
@@ -518,7 +652,7 @@ extern struct json_object CPL_DLL* json_object_new_double(double d);
  * @param obj the json_object instance
  * @returns a double floating point number
  */
-extern double json_object_get_double(struct json_object *obj);
+extern double json_object_get_double(const struct json_object *obj);
 
 
 /* string type methods */
@@ -530,7 +664,7 @@ extern double json_object_get_double(struct json_object *obj);
  * @param s the string
  * @returns a json_object of type json_type_string
  */
-extern struct json_object CPL_DLL* json_object_new_string(const char *s);
+extern struct json_object* json_object_new_string(const char *s);
 
 extern struct json_object* json_object_new_string_len(const char *s, int len);
 
@@ -555,7 +689,7 @@ extern const char* json_object_get_string(struct json_object *obj);
  * @param obj the json_object instance
  * @returns int
  */
-extern int json_object_get_string_len(struct json_object *obj);
+extern int json_object_get_string_len(const struct json_object *obj);
 
 #ifdef __cplusplus
 }

@@ -45,6 +45,10 @@ set(VERSION ${JSON_C_MAJOR_VERSION}.${JSON_C_MINOR_VERSION}.${JSON_C_REV_VERSION
 
 report_version(${PROJECT_NAME} ${VERSION})  
 
+set(PACKAGE_NAME "JSON C Library")
+set(PACKAGE_STRING "${PACKAGE_NAME} ${VERSION}")
+set(PACKAGE_TARNAME ${PROJECT_NANE})
+
 # setup paths
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
@@ -64,9 +68,10 @@ set(HHEADERS
     json_object_private.h
     json_tokener.h
     json_util.h
+    math_compat.h
     linkhash.h
-    printbuf.h 
-    symbol_renames.h
+    printbuf.h
+    random_seed.h
 )
 
 set(CSOURCES
@@ -79,6 +84,7 @@ set(CSOURCES
     json_util.c
     linkhash.c
     printbuf.c
+    random_seed.c
 )
 
 set(LIB_NAME)

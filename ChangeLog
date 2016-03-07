@@ -1,4 +1,47 @@
 
+NEXT.VERSION
+
+  ...nothing yet...
+
+0.12
+
+  * Address security issues:
+    * CVE-2013-6371: hash collision denial of service
+    * CVE-2013-6370: buffer overflow if size_t is larger than int
+
+  * Avoid potential overflow in json_object_get_double
+
+  * Eliminate the mc_abort() function and MC_ABORT macro.
+
+  * Make the json_tokener_errors array local.  It has been deprecated for
+     a while, and json_tokener_error_desc() should be used instead.
+
+  * change the floating point output format to %.17g so values with 
+     more than 6 digits show up in the output.
+
+  * Remove the old libjson.so name compatibility support.  The library is
+      only created as libjson-c.so now and headers are only installed 
+      into the ${prefix}/json-c directory.
+
+  * When supported by the linker, add the -Bsymbolic-functions flag.
+
+  * Various changes to fix the build on MSVC.
+
+  * Make strict mode more strict:
+    * number must not start with 0
+    * no single-quote strings
+    * no comments
+    * trailing char not allowed
+    * only allow lowercase literals
+
+  * Added a json_object_new_double_s() convenience function to allow
+    an exact string representation of a double to be specified when
+    creating the object and use it in json_tokener_parse_ex() so
+    a re-serialized object more exactly matches the input.
+
+  * Add support NaN and Infinity
+
+
 0.11
 
   * IMPORTANT: the name of the library has changed to libjson-c.so and
@@ -31,8 +74,8 @@
   * Add an alternative iterator implementation, see json_object_iterator.h
   * Make json_object_iter public to enable external use of the
      json_object_object_foreachC macro.
-  * Add a printbuf_memset() function to provide an efficient way to set and
-     append things like white-space indentation.
+  * Add a printbuf_memset() function to provide an effecient way to set and
+     append things like whitespace indentation.
   * Adjust json_object_is_type and json_object_get_type so they return
       json_type_null for NULL objects and handle NULL passed to
       json_objct_object_get().
@@ -95,7 +138,7 @@
     to not return TRUE for zero length string. Remove redundant includes.
     Erik Hovland, erik at hovland dot org
   * Fixed warning reported by adding -Wstrict-prototypes
-    -Wold-style-definition to the compilation flags.
+    -Wold-style-definition to the compilatin flags.
     Dotan Barak, dotanba at gmail dot com
   * Add const correctness to public interfaces
     Gerard Krol, g dot c dot krol at student dot tudelft dot nl
@@ -113,14 +156,14 @@
     Geoffrey Young, geoff at modperlcookbook dot org
 
 0.7
-  * Add escaping of backslash to JSON output
-  * Add escaping of forward slash on tokenizing and output
+  * Add escaping of backslash to json output
+  * Add escaping of foward slash on tokenizing and output
   * Changes to internal tokenizer from using recursion to
     using a depth state structure to allow incremental parsing
 
 0.6
   * Fix bug in escaping of control characters
-    Johan BjÃ¶rklund, johbjo09 at kth dot se
+    Johan Björklund, johbjo09 at kth dot se
   * Remove include "config.h" from headers (should only
     be included from .c files)
     Michael Clark <michael@metaparadigm.com>
@@ -166,7 +209,7 @@
     Added cast and mask to suffice size_t v. unsigned int conversion
     correctness 
   * json_tokener.c - sign reversal issue on error info for nested object parse
-    spotted by Johan BjÃ¶rklund (johbjo09 at kth.se)
+    spotted by Johan Björklund (johbjo09 at kth.se)
   * json_object.c - escape " in json_escape_str
   * Change to automake and libtool to build shared and static library
     Michael Clark <michael@metaparadigm.com>

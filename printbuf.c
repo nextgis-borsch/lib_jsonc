@@ -19,15 +19,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "cpl_string.h" 
-
-#if HAVE_STDARG_H
+#ifdef HAVE_STDARG_H
 # include <stdarg.h>
 #else /* !HAVE_STDARG_H */
 # error Not enough var arg support!
 #endif /* HAVE_STDARG_H */
 
-#include "bits.h"
 #include "debug.h"
 #include "printbuf.h"
 
@@ -65,7 +62,9 @@ static int printbuf_extend(struct printbuf *p, int min_size)
 	if (p->size >= min_size)
 		return 0;
 
-	new_size = json_max(p->size * 2, min_size + 8);
+	new_size = p->size * 2;
+	if (new_size < min_size + 8)
+		new_size =  min_size + 8;
 #ifdef PRINTBUF_DEBUG
 	MC_DEBUG("printbuf_memappend: realloc "
 	  "bpos=%d min_size=%d old_size=%d new_size=%d\n",
@@ -109,28 +108,74 @@ int printbuf_memset(struct printbuf *pb, int offset, int charvalue, int len)
 
 	return 0;
 }
-/* Use CPLVASPrintf for portability issues */
+
+#if !defined(HAVE_VSNPRINTF) && defined(_MSC_VER)
+# define vsnprintf _vsnprintf
+#elif !defined(HAVE_VSNPRINTF) /* !HAVE_VSNPRINTF */
+# error Need vsnprintf!
+#endif /* !HAVE_VSNPRINTF && defined(WIN32) */
+
+#if !defined(HAVE_VASPRINTF)
+/* CAW: compliant version of vasprintf */
+static int vasprintf(char **buf, const char *fmt, va_list ap)
+{
+#ifndef WIN32
+	static char _T_emptybuffer = '\0';
+#endif /* !defined(WIN32) */
+	int chars;
+	char *b;
+
+	if(!buf) { return -1; }
+
+#ifdef WIN32
+	chars = _vscprintf(fmt, ap)+1;
+#else /* !defined(WIN32) */
+	/* CAW: RAWR! We have to hope to god here that vsnprintf doesn't overwrite
+	   our buffer like on some 64bit sun systems.... but hey, its time to move on */
+	chars = vsnprintf(&_T_emptybuffer, 0, fmt, ap)+1;
+	if(chars < 0) { chars *= -1; } /* CAW: old glibc versions have this problem */
+#endif /* defined(WIN32) */
+
+	b = (char*)malloc(sizeof(char)*chars);
+	if(!b) { return -1; }
+
+	if((chars = vsprintf(b, fmt, ap)) < 0)
+	{
+		free(b);
+	} else {
+		*buf = b;
+	}
+
+	return chars;
+}
+#endif /* !HAVE_VASPRINTF */
+
 int sprintbuf(struct printbuf *p, const char *msg, ...)
 {
   va_list ap;
   char *t;
-  int size, ret; 
+  int size;
+  char buf[128];
 
   /* user stack buffer first */
   va_start(ap, msg);
-  if((size = CPLVASPrintf(&t, msg, ap)) == -1) return -1; 
+  size = vsnprintf(buf, 128, msg, ap);
   va_end(ap);
-  
-  if (strcmp(msg, "%f") == 0)
-  {
-      char* pszComma = strchr(t, ',');
-      if (pszComma)
-          *pszComma = '.';
+  /* if string is greater than stack buffer, then use dynamic string
+     with vasprintf.  Note: some implementation of vsnprintf return -1
+     if output is truncated whereas some return the number of bytes that
+     would have been written - this code handles both cases. */
+  if(size == -1 || size > 127) {
+    va_start(ap, msg);
+    if((size = vasprintf(&t, msg, ap)) < 0) { va_end(ap); return -1; }
+    va_end(ap);
+    printbuf_memappend(p, t, size);
+    free(t);
+    return size;
+  } else {
+    printbuf_memappend(p, buf, size);
+    return size;
   }
-  
-  ret = printbuf_memappend(p, t, size);
-  CPLFree(t);
-  return ret;
 }
 
 void printbuf_reset(struct printbuf *p)
