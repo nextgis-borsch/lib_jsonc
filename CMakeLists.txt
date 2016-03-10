@@ -111,7 +111,7 @@ if(BUILD_SHARED_LIBS)
     endif()    
     set_target_properties (${LIB_NAME} PROPERTIES VERSION ${LIB_VERSION})
     set_target_properties (${LIB_NAME} PROPERTIES SOVERSION ${LIB_VERSION})
-    set_target_properties(${LIB_NAME} PROPERTIES DEFINE_SYMBOL JSONC_DLL_EXPORTS)
+    set_target_properties (${LIB_NAME} PROPERTIES DEFINE_SYMBOL JSONC_DLL_EXPORTS)
 endif()
 
 

@@ -105,7 +105,7 @@ struct json_tokener
  *
  * @return a generic error message is returned if an invalid error value is provided.
  */
-const char *json_tokener_error_desc(enum json_tokener_error jerr);
+EXTERN const char *json_tokener_error_desc(enum json_tokener_error jerr);
 
 /**
  * Retrieve the error caused by the last call to json_tokener_parse_ex(),
@@ -198,7 +198,7 @@ if (tok->char_offset < stringlen) // XXX shouldn't access internal fields
  * @param str an string with any valid JSON expression, or portion of.  This does not need to be null terminated.
  * @param len the length of str
  */
-extern struct json_object* json_tokener_parse_ex(struct json_tokener *tok,
+EXTERN struct json_object* json_tokener_parse_ex(struct json_tokener *tok,
 						 const char *str, int len);
 
 #ifdef __cplusplus

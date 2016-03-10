@@ -195,7 +195,7 @@ EXTERN struct json_object* json_object_get(struct json_object *obj);
  * @param obj the json_object instance
  * @returns 1 if the object was freed.
  */
-int json_object_put(struct json_object *obj);
+EXTERN int json_object_put(struct json_object *obj);
 
 /**
  * Check if the json_object is of a given type
