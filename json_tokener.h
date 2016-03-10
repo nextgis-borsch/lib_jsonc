@@ -118,17 +118,17 @@ const char *json_tokener_error_desc(enum json_tokener_error jerr);
  */
 enum json_tokener_error json_tokener_get_error(struct json_tokener *tok);
 
-extern struct json_tokener* json_tokener_new(void);
-extern struct json_tokener* json_tokener_new_ex(int depth);
-extern void json_tokener_free(struct json_tokener *tok);
-extern void json_tokener_reset(struct json_tokener *tok);
-extern struct json_object* json_tokener_parse(const char *str);
-extern struct json_object* json_tokener_parse_verbose(const char *str, enum json_tokener_error *error);
+EXTERN struct json_tokener* json_tokener_new(void);
+EXTERN struct json_tokener* json_tokener_new_ex(int depth);
+EXTERN void json_tokener_free(struct json_tokener *tok);
+EXTERN void json_tokener_reset(struct json_tokener *tok);
+EXTERN struct json_object* json_tokener_parse(const char *str);
+EXTERN struct json_object* json_tokener_parse_verbose(const char *str, enum json_tokener_error *error);
 
 /**
  * Set flags that control how parsing will be done.
  */
-extern void json_tokener_set_flags(struct json_tokener *tok, int flags);
+EXTERN void json_tokener_set_flags(struct json_tokener *tok, int flags);
 
 /**
  * Parse a string and return a non-NULL json_object if a valid JSON value

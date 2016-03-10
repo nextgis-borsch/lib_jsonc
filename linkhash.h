@@ -162,7 +162,7 @@ for(entry = table->head; entry && ((tmp = entry->next) || 1); entry = tmp)
  * @return On success, a pointer to the new linkhash table is returned.
  * 	On error, a null pointer is returned.
  */
-extern struct lh_table* lh_table_new(int size,
+EXTERN struct lh_table* lh_table_new(int size,
 				     lh_entry_free_fn *free_fn,
 				     lh_hash_fn *hash_fn,
 				     lh_equal_fn *equal_fn);
@@ -176,7 +176,7 @@ extern struct lh_table* lh_table_new(int size,
  * @return On success, a pointer to the new linkhash table is returned.
  * 	On error, a null pointer is returned.
  */
-extern struct lh_table* lh_kchar_table_new(int size,
+EXTERN struct lh_table* lh_kchar_table_new(int size,
 					   lh_entry_free_fn *free_fn);
 
 
@@ -189,7 +189,7 @@ extern struct lh_table* lh_kchar_table_new(int size,
  * @return On success, a pointer to the new linkhash table is returned.
  * 	On error, a null pointer is returned.
  */
-extern struct lh_table* lh_kptr_table_new(int size,
+EXTERN struct lh_table* lh_kptr_table_new(int size,
 					  lh_entry_free_fn *free_fn);
 
 
@@ -199,7 +199,7 @@ extern struct lh_table* lh_kptr_table_new(int size,
  * entries in the table.
  * @param t table to free.
  */
-extern void lh_table_free(struct lh_table *t);
+EXTERN void lh_table_free(struct lh_table *t);
 
 
 /**
@@ -211,7 +211,7 @@ extern void lh_table_free(struct lh_table *t);
  * @return On success, <code>0</code> is returned.
  * 	On error, a negative value is returned.
  */
-extern int lh_table_insert(struct lh_table *t, void *k, const void *v);
+EXTERN int lh_table_insert(struct lh_table *t, void *k, const void *v);
 
 
 /**
@@ -226,7 +226,7 @@ extern int lh_table_insert(struct lh_table *t, void *k, const void *v);
  * @param h hash value of the key to insert
  * @param opts opts, a subset of JSON_OBJECT_ADD_* flags is supported
  */
-extern int lh_table_insert_w_hash(struct lh_table *t, void *k, const void *v, const unsigned long h, const unsigned opts);
+EXTERN int lh_table_insert_w_hash(struct lh_table *t, void *k, const void *v, const unsigned long h, const unsigned opts);
 
 
 /**
@@ -235,7 +235,7 @@ extern int lh_table_insert_w_hash(struct lh_table *t, void *k, const void *v, co
  * @param k a pointer to the key to lookup
  * @return a pointer to the record structure of the value or NULL if it does not exist.
  */
-extern struct lh_entry* lh_table_lookup_entry(struct lh_table *t, const void *k);
+EXTERN struct lh_entry* lh_table_lookup_entry(struct lh_table *t, const void *k);
 
 /**
  * Lookup a record into the table. This one accepts the key's hash in additon
@@ -248,7 +248,7 @@ extern struct lh_entry* lh_table_lookup_entry(struct lh_table *t, const void *k)
  * @param h hash value of the key to lookup
  * @return a pointer to the record structure of the value or NULL if it does not exist.
  */
-extern struct lh_entry* lh_table_lookup_entry_w_hash(struct lh_table *t, const void *k, const unsigned long h);
+EXTERN struct lh_entry* lh_table_lookup_entry_w_hash(struct lh_table *t, const void *k, const unsigned long h);
 
 /**
  * Lookup a record into the table
@@ -257,7 +257,7 @@ extern struct lh_entry* lh_table_lookup_entry_w_hash(struct lh_table *t, const v
  * @return a pointer to the found value or NULL if it does not exist.
  * @deprecated Use lh_table_lookup_ex instead.
  */
-THIS_FUNCTION_IS_DEPRECATED(extern const void* lh_table_lookup(struct lh_table *t, const void *k));
+THIS_FUNCTION_IS_DEPRECATED(EXTERN const void* lh_table_lookup(struct lh_table *t, const void *k));
 
 /**
  * Lookup a record in the table
@@ -266,7 +266,7 @@ THIS_FUNCTION_IS_DEPRECATED(extern const void* lh_table_lookup(struct lh_table *
  * @param v a pointer to a where to store the found value (set to NULL if it doesn't exist).
  * @return whether or not the key was found
  */
-extern json_bool lh_table_lookup_ex(struct lh_table *t, const void *k, void **v);
+EXTERN json_bool lh_table_lookup_ex(struct lh_table *t, const void *k, void **v);
 
 /**
  * Delete a record from the table.
@@ -277,7 +277,7 @@ extern json_bool lh_table_lookup_ex(struct lh_table *t, const void *k, void **v)
  * @return 0 if the item was deleted.
  * @return -1 if it was not found.
  */
-extern int lh_table_delete_entry(struct lh_table *t, struct lh_entry *e);
+EXTERN int lh_table_delete_entry(struct lh_table *t, struct lh_entry *e);
 
 
 /**
@@ -289,9 +289,9 @@ extern int lh_table_delete_entry(struct lh_table *t, struct lh_entry *e);
  * @return 0 if the item was deleted.
  * @return -1 if it was not found.
  */
-extern int lh_table_delete(struct lh_table *t, const void *k);
+EXTERN int lh_table_delete(struct lh_table *t, const void *k);
 
-extern int lh_table_length(struct lh_table *t);
+EXTERN int lh_table_length(struct lh_table *t);
 
 /**
  * Prints a message to <code>stdout</code>,
