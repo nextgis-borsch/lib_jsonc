@@ -26,7 +26,7 @@
 ################################################################################
 cmake_minimum_required (VERSION 2.8.12 FATAL_ERROR)
 
-project(json-c)
+project(json-c C)
 
 # some init settings
 set(CMAKE_COLOR_MAKEFILE ON)
@@ -48,6 +48,14 @@ report_version(${PROJECT_NAME} ${VERSION})
 # setup paths
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
+if(MSVC)
+    if(CMAKE_C_COMPILER_VERSION VERSION_LESS "18.0.31101.0")
+        message(FATAL_ERROR "The compiled version is less than VC 2013 SP 4")
+    endif()
+    
+    add_definitions (-D_CRT_NONSTDC_NO_DEPRECATE -D_CRT_SECURE_NO_WARNINGS -D_CRT_NON_CONFORMING_SWPRINTFS -D_CRT_SECURE_NO_DEPRECATE)
+endif()
 
 include(configure)
 
