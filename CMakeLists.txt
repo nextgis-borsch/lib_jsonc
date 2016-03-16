@@ -33,9 +33,11 @@ set(CMAKE_COLOR_MAKEFILE ON)
 # set path to additional CMake modules
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 
-set(INSTALL_BIN_DIR "${CMAKE_INSTALL_PREFIX}/bin" CACHE INTERNAL "Installation directory for executables" FORCE)
-set(INSTALL_LIB_DIR "${CMAKE_INSTALL_PREFIX}/lib" CACHE INTERNAL "Installation directory for libraries" FORCE)
-set(INSTALL_INC_DIR "${CMAKE_INSTALL_PREFIX}/include/${PROJECT_NAME}" CACHE INTERNAL "Installation directory for headers" FORCE)
+include(GNUInstallDirs)
+
+set(INSTALL_BIN_DIR ${CMAKE_INSTALL_BINDIR} CACHE INTERNAL "Installation directory for executables" FORCE)
+set(INSTALL_LIB_DIR ${CMAKE_INSTALL_LIBDIR} CACHE INTERNAL "Installation directory for libraries" FORCE)
+set(INSTALL_INC_DIR "${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}" CACHE INTERNAL "Installation directory for headers" FORCE)
 
 # setup package meta-data
 include(util)
@@ -44,6 +46,10 @@ check_version(JSON_C_MAJOR_VERSION JSON_C_MINOR_VERSION JSON_C_REV_VERSION)
 set(VERSION ${JSON_C_MAJOR_VERSION}.${JSON_C_MINOR_VERSION}.${JSON_C_REV_VERSION})
 
 report_version(${PROJECT_NAME} ${VERSION})  
+
+set(PACKAGE_NAME "JSON C Library")
+set(PACKAGE_STRING "${PACKAGE_NAME} ${VERSION}")
+set(PACKAGE_TARNAME ${PROJECT_NANE})
 
 # setup paths
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
@@ -60,6 +66,7 @@ endif()
 include(configure)
 
 set(HHEADERS
+    ${CMAKE_CURRENT_BINARY_DIR}/config.h
     ${CMAKE_CURRENT_BINARY_DIR}/json_config.h
     arraylist.h
     bits.h
@@ -72,9 +79,10 @@ set(HHEADERS
     json_object_private.h
     json_tokener.h
     json_util.h
+    math_compat.h
     linkhash.h
-    printbuf.h 
-    symbol_renames.h
+    printbuf.h
+    random_seed.h
 )
 
 set(CSOURCES
@@ -87,6 +95,7 @@ set(CSOURCES
     json_util.c
     linkhash.c
     printbuf.c
+    random_seed.c
 )
 
 set(LIB_NAME)
@@ -94,6 +103,7 @@ if(BUILD_SHARED_LIBS)
     set(LIB_TYPE SHARED)
     set(LIB_NAME ${PROJECT_NAME})
 else()
+    add_definitions(-DJSONC_STATIC)
     set(LIB_TYPE STATIC)
     set(LIB_NAME ${PROJECT_NAME}static)
 endif()
@@ -111,6 +121,7 @@ if(BUILD_SHARED_LIBS)
     endif()    
     set_target_properties (${LIB_NAME} PROPERTIES VERSION ${LIB_VERSION})
     set_target_properties (${LIB_NAME} PROPERTIES SOVERSION ${LIB_VERSION})
+    set_target_properties (${LIB_NAME} PROPERTIES DEFINE_SYMBOL JSONC_DLL_EXPORTS)
 endif()
 
 

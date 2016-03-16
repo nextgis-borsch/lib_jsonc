@@ -9,8 +9,8 @@
  *
  */
 
-#ifndef arraylist_h_
-#define arraylist_h_
+#ifndef _arraylist_h_
+#define _arraylist_h_
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,6 +48,11 @@ array_list_length(struct array_list *al);
 
 extern void
 array_list_sort(struct array_list *arr, int(*compar)(const void *, const void *));
+
+extern void* array_list_bsearch(const void **key,
+		struct array_list *arr,
+		int (*sort_fn)(const void *, const void *));
+
 
 #ifdef __cplusplus
 }

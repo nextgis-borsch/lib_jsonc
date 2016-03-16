@@ -9,12 +9,14 @@
  *
  */
 
-#ifndef json_object_private_h_
-#define json_object_private_h_
+#ifndef _json_object_private_h_
+#define _json_object_private_h_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#define LEN_DIRECT_STRING_DATA 32 /**< how many bytes are directly stored in json_object for strings? */
 
 typedef void (json_object_private_delete_fn)(struct json_object *o);
 
@@ -32,7 +34,13 @@ struct json_object
     struct lh_table *c_object;
     struct array_list *c_array;
     struct {
-        char *str;
+	union {
+		/* optimize: if we have small strings, we can store them
+		 * directly. This saves considerable CPU cycles AND memory.
+		 */
+		char *ptr;
+		char data[LEN_DIRECT_STRING_DATA];
+	} str;
         int len;
     } c_string;
   } o;
