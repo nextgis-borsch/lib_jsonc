@@ -36,6 +36,10 @@ include (TestBigEndian)
 # include (CheckCXXSourceCompiles)
 # include (CompilerFlags)
 
+if(CMAKE_GENERATOR_TOOLSET MATCHES "*xp")
+    add_definitions(-D_WIN32_WINNT=0x0501)
+endif()
+
 check_include_file("inttypes.h" JSON_C_HAVE_INTTYPES_H)
 check_include_file("inttypes.h" HAVE_INTTYPES_H)
 check_include_file("fcntl.h" HAVE_FCNTL_H)
