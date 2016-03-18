@@ -66,6 +66,9 @@
 /* Define to 1 if you have the `vsyslog' function. */
 #cmakedefine HAVE_VSYSLOG 1
 
+/* Define to 1 if you have the `vsnprintf' function. */
+#cmakedefine HAVE_VSNPRINTF 1
+
 /* Define to 1 if you have the `strncasecmp' function. */
 #ifndef HAVE_STRNCASECMP
 #cmakedefine HAVE_STRNCASECMP 1
