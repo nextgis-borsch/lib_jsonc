@@ -17,13 +17,13 @@
 # endif
 #endif
 
-#ifndef HAVE_DECL_INFINITY
+#if !defined HAVE_DECL_INFINITY && !defined INFINITY
 #include <float.h>
 #define INFINITY (DBL_MAX + DBL_MAX)
 #define HAVE_DECL_INFINITY
 #endif
 
-#ifndef HAVE_DECL_NAN
+#if !defined HAVE_DECL_NAN && !defined NAN
 #define NAN (INFINITY - INFINITY)
 #define HAVE_DECL_NAN
 #endif
