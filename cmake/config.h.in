@@ -69,6 +69,9 @@
 /* Define to 1 if you have the `vsnprintf' function. */
 #cmakedefine HAVE_VSNPRINTF 1
 
+/* Define to 1 if you have the `vasprintf' function. */
+#cmakedefine HAVE_VASPRINTF 1
+
 /* Define to 1 if you have the `strncasecmp' function. */
 #ifndef HAVE_STRNCASECMP
 #cmakedefine HAVE_STRNCASECMP 1
