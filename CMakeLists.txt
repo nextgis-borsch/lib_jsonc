@@ -112,6 +112,9 @@ else()
     endif()
 endif()
 
+set( CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}" )
+set( CMAKE_C_FLAGS   "-std=c99 ${CMAKE_C_FLAGS}" )  
+
 add_library(${LIB_NAME} ${LIB_TYPE} ${CSOURCES} ${HHEADERS})
 
 if(BUILD_SHARED_LIBS)
@@ -127,9 +130,6 @@ if(BUILD_SHARED_LIBS)
     set_target_properties (${LIB_NAME} PROPERTIES SOVERSION ${LIB_VERSION})
     set_target_properties (${LIB_NAME} PROPERTIES DEFINE_SYMBOL JSONC_DLL_EXPORTS)
 endif()
-
-set_property(TARGET ${LIB_NAME} PROPERTY CXX_STANDARD 11)
-set_property(TARGET ${LIB_NAME} PROPERTY C_STANDARD 11)
 
 export(TARGETS ${LIB_NAME} FILE ${LIB_NAME}-exports.cmake EXPORT_LINK_INTERFACE_LIBRARIES)
 
