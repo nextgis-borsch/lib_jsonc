@@ -98,14 +98,12 @@ set(CSOURCES
     random_seed.c
 )
 
-set(LIB_NAME)
+set(LIB_NAME ${PROJECT_NAME})
 if(BUILD_SHARED_LIBS)
     set(LIB_TYPE SHARED)
-    set(LIB_NAME ${PROJECT_NAME})
 else()
     add_definitions(-DJSONC_STATIC)
     set(LIB_TYPE STATIC)
-    set(LIB_NAME ${PROJECT_NAME}static)
     if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
         set( CMAKE_CXX_FLAGS "-fpic ${CMAKE_CXX_FLAGS}" )
         set( CMAKE_C_FLAGS   "-fpic ${CMAKE_C_FLAGS}" )  
