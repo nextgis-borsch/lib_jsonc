@@ -33,11 +33,41 @@ set(CMAKE_COLOR_MAKEFILE ON)
 # set path to additional CMake modules
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 
-include(GNUInstallDirs)
+if(OSX_FRAMEWORK AND (BUILD_SHARED_LIBS OR BUILD_STATIC_LIBS))
+  message(FATAL_ERROR "Only OSX_FRAMEWORK key or any or both BUILD_SHARED_LIBS
+                       and BUILD_STATIC_LIBS keys are permitted")
+endif()
 
-set(INSTALL_BIN_DIR ${CMAKE_INSTALL_BINDIR} CACHE INTERNAL "Installation directory for executables" FORCE)
-set(INSTALL_LIB_DIR ${CMAKE_INSTALL_LIBDIR} CACHE INTERNAL "Installation directory for libraries" FORCE)
-set(INSTALL_INC_DIR "${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}" CACHE INTERNAL "Installation directory for headers" FORCE)
+if(OSX_FRAMEWORK)
+    set(INSTALL_BIN_DIR "${CMAKE_INSTALL_PREFIX}/Applications" CACHE INTERNAL "Installation directory for executables" FORCE)
+    set(INSTALL_LIB_DIR "${CMAKE_INSTALL_PREFIX}/Library/Frameworks" CACHE INTERNAL "Installation directory for libraries" FORCE)
+    set(SKIP_INSTALL_HEADERS ON)
+    set(SKIP_INSTALL_EXECUTABLES ON)
+    set(SKIP_INSTALL_FILES ON)
+    set(SKIP_INSTALL_EXPORT ON)
+
+    set(CMAKE_MACOSX_RPATH ON)
+
+    # use, i.e. don't skip the full RPATH for the build tree
+    set(CMAKE_SKIP_BUILD_RPATH  TRUE)
+
+    # when building, don't use the install RPATH already
+    # (but later on when installing)
+    set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+
+    # the RPATH to be used when installing
+    set(CMAKE_INSTALL_RPATH "${INSTALL_LIB_DIR}")
+
+    # don't add the automatically determined parts of the RPATH
+    # which point to directories outside the build tree to the install RPATH
+    set(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
+else()
+    include(GNUInstallDirs)
+
+    set(INSTALL_BIN_DIR ${CMAKE_INSTALL_BINDIR} CACHE INTERNAL "Installation directory for executables" FORCE)
+    set(INSTALL_LIB_DIR ${CMAKE_INSTALL_LIBDIR} CACHE INTERNAL "Installation directory for libraries" FORCE)
+    set(INSTALL_INC_DIR "${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}" CACHE INTERNAL "Installation directory for headers" FORCE)
+endif()
 
 # setup package meta-data
 include(util)
@@ -45,7 +75,7 @@ include(util)
 check_version(JSON_C_MAJOR_VERSION JSON_C_MINOR_VERSION JSON_C_REV_VERSION)
 set(VERSION ${JSON_C_MAJOR_VERSION}.${JSON_C_MINOR_VERSION}.${JSON_C_REV_VERSION})
 
-report_version(${PROJECT_NAME} ${VERSION})  
+report_version(${PROJECT_NAME} ${VERSION})
 
 set(PACKAGE_NAME "JSON C Library")
 set(PACKAGE_STRING "${PACKAGE_NAME} ${VERSION}")
@@ -59,7 +89,7 @@ if(MSVC)
     if(CMAKE_C_COMPILER_VERSION VERSION_LESS "18.0.31101.0")
         message(FATAL_ERROR "The compiled version is less than VC 2013 SP 4")
     endif()
-    
+
     add_definitions (-D_CRT_NONSTDC_NO_DEPRECATE -D_CRT_SECURE_NO_WARNINGS -D_CRT_NON_CONFORMING_SWPRINTFS -D_CRT_SECURE_NO_DEPRECATE)
 endif()
 
@@ -106,34 +136,49 @@ else()
     set(LIB_TYPE STATIC)
     if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
         set( CMAKE_CXX_FLAGS "-fpic ${CMAKE_CXX_FLAGS}" )
-        set( CMAKE_C_FLAGS   "-fpic ${CMAKE_C_FLAGS}" )  
+        set( CMAKE_C_FLAGS   "-fpic ${CMAKE_C_FLAGS}" )
     endif()
 endif()
 
-#set( CMAKE_C_FLAGS   "-std=c99 ${CMAKE_C_FLAGS}" )  
-
-add_library(${LIB_NAME} ${LIB_TYPE} ${CSOURCES} ${HHEADERS})
+#set( CMAKE_C_FLAGS   "-std=c99 ${CMAKE_C_FLAGS}" )
 
 if(BUILD_SHARED_LIBS)
+    add_library(${LIB_NAME} ${LIB_TYPE} ${CSOURCES} ${HHEADERS})
     if(WIN32)
         set (LIB_VERSION ${JSON_C_MAJOR_VERSION})
-        if(MSVC)        
+        if(MSVC)
             set_target_properties(${LIB_NAME} PROPERTIES IMPORT_SUFFIX "_i.lib")
         endif()
     else ()
         set (LIB_VERSION ${VERSION})
-    endif()    
+    endif()
     set_target_properties (${LIB_NAME} PROPERTIES VERSION ${LIB_VERSION})
     set_target_properties (${LIB_NAME} PROPERTIES SOVERSION ${LIB_VERSION})
     set_target_properties (${LIB_NAME} PROPERTIES DEFINE_SYMBOL JSONC_DLL_EXPORTS)
+elseif(OSX_FRAMEWORK)
+    add_library(${LIB_NAME} SHARED ${CSOURCES} ${HHEADERS})
+    set_target_properties(${LIB_NAME} PROPERTIES
+        FRAMEWORK TRUE
+        FRAMEWORK_VERSION "${JSON_C_MAJOR_VERSION}.${JSON_C_MINOR_VERSION}"
+        MACOSX_FRAMEWORK_SHORT_VERSION_STRING ${VERSION}
+        MACOSX_FRAMEWORK_BUNDLE_VERSION ${VERSION}
+        MACOSX_FRAMEWORK_IDENTIFIER org.jsonc.jsonc
+        XCODE_ATTRIBUTE_INSTALL_PATH "@rpath"
+        PUBLIC_HEADER "${HHEADERS}")
+else()
+    add_library(${LIB_NAME} ${LIB_TYPE} ${CSOURCES} ${HHEADERS})
 endif()
 
 export(TARGETS ${LIB_NAME} FILE ${LIB_NAME}-exports.cmake EXPORT_LINK_INTERFACE_LIBRARIES)
 
-install(TARGETS ${LIB_NAME} RUNTIME DESTINATION ${INSTALL_BIN_DIR} COMPONENT libraries
-                      LIBRARY DESTINATION ${INSTALL_LIB_DIR} COMPONENT libraries
-                      ARCHIVE DESTINATION ${INSTALL_LIB_DIR} COMPONENT libraries)
-                      
+if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL )
+    install(TARGETS ${LIB_NAME}
+        RUNTIME DESTINATION ${INSTALL_BIN_DIR} COMPONENT libraries
+        LIBRARY DESTINATION ${INSTALL_LIB_DIR} COMPONENT libraries
+        ARCHIVE DESTINATION ${INSTALL_LIB_DIR} COMPONENT libraries
+        FRAMEWORK DESTINATION ${INSTALL_LIB_DIR}
+    )
+endif()
 
 # install headers
 if(NOT SKIP_INSTALL_HEADERS AND NOT SKIP_INSTALL_ALL )
@@ -142,4 +187,3 @@ endif()
 
 # uninstall
 add_custom_target(uninstall COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
-

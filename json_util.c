@@ -53,6 +53,7 @@
 # error You do not have snprintf on your system.
 #endif /* HAVE_SNPRINTF */
 
+#include "bits.h"
 #include "debug.h"
 #include "printbuf.h"
 #include "json_inttypes.h"
@@ -64,50 +65,35 @@ static int sscanf_is_broken = 0;
 static int sscanf_is_broken_testdone = 0;
 static void sscanf_is_broken_test(void);
 
-/*
- * Create a JSON object from already opened file descriptor.
- *
- * This function can be helpful, when you opened the file already,
- * e.g. when you have a temp file.
- * Note, that the fd must be readable at the actual position, i.e.
- * use lseek(fd, 0, SEEK_SET) before.
- */
-struct json_object* json_object_from_fd(int fd)
+struct json_object* json_object_from_file(const char *filename)
 {
   struct printbuf *pb;
   struct json_object *obj;
   char buf[JSON_FILE_BUF_SIZE];
-  int ret;
-
-  if(!(pb = printbuf_new())) {
-    MC_ERROR("json_object_from_file: printbuf_new failed\n");
-    return NULL;
-  }
-  while((ret = read(fd, buf, JSON_FILE_BUF_SIZE)) > 0) {
-    printbuf_memappend(pb, buf, ret);
-  }
-  if(ret < 0) {
-    MC_ERROR("json_object_from_fd: error reading fd %d: %s\n", fd, strerror(errno));
-    printbuf_free(pb);
-    return NULL;
-  }
-  obj = json_tokener_parse(pb->buf);
-  printbuf_free(pb);
-  return obj;
-}
-
-struct json_object* json_object_from_file(const char *filename)
-{
-  struct json_object *obj;
-  int fd;
+  int fd, ret;
 
   if((fd = open(filename, O_RDONLY)) < 0) {
     MC_ERROR("json_object_from_file: error opening file %s: %s\n",
 	     filename, strerror(errno));
     return NULL;
   }
-  obj = json_object_from_fd(fd);
+  if(!(pb = printbuf_new())) {
+    close(fd);
+    MC_ERROR("json_object_from_file: printbuf_new failed\n");
+    return NULL;
+  }
+  while((ret = read(fd, buf, JSON_FILE_BUF_SIZE)) > 0) {
+    printbuf_memappend(pb, buf, ret);
+  }
   close(fd);
+  if(ret < 0) {
+    MC_ERROR("json_object_from_file: error reading file %s: %s\n",
+	     filename, strerror(errno));
+    printbuf_free(pb);
+    return NULL;
+  }
+  obj = json_tokener_parse(pb->buf);
+  printbuf_free(pb);
   return obj;
 }
 

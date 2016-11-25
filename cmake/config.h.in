@@ -72,6 +72,12 @@
 /* Define to 1 if you have the `vasprintf' function. */
 #cmakedefine HAVE_VASPRINTF 1
 
+/* Define to 1 if you have the `infinity'. */
+#cmakedefine HAVE_DECL_INFINITY 1
+
+/* Define to 1 if you have the `nan'. */
+#cmakedefine HAVE_DECL_NAN 1
+
 /* Define to 1 if you have the `strncasecmp' function. */
 #ifndef HAVE_STRNCASECMP
 #cmakedefine HAVE_STRNCASECMP 1
@@ -84,4 +90,3 @@
 
 /* Define to 1 if you have the ANSI C header files. */
 #cmakedefine STDC_HEADERS 1
-

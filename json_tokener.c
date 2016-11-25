@@ -16,7 +16,6 @@
 #include "config.h"
 
 #include <math.h>
-#include "math_compat.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
@@ -24,6 +23,7 @@
 #include <string.h>
 #include <limits.h>
 
+#include "bits.h"
 #include "debug.h"
 #include "printbuf.h"
 #include "arraylist.h"
@@ -35,8 +35,6 @@
 #ifdef HAVE_LOCALE_H
 #include <locale.h>
 #endif /* HAVE_LOCALE_H */
-
-#define jt_hexdigit(x) (((x) <= '9') ? (x) - '0' : ((x) & 7) + 9)
 
 #if !HAVE_STRDUP && defined(_MSC_VER)
   /* MSC has the version as _strdup */
@@ -131,7 +129,7 @@ void json_tokener_free(struct json_tokener *tok)
 {
   json_tokener_reset(tok);
   if (tok->pb) printbuf_free(tok->pb);
-  free(tok->stack);
+  if (tok->stack) free(tok->stack);
   free(tok);
 }
 
@@ -253,9 +251,6 @@ struct json_object* json_tokener_parse_ex(struct json_tokener *tok,
      the string length is less than INT32_MAX (2GB) */
   if ((len < -1) || (len == -1 && strlen(str) > INT32_MAX)) {
     tok->err = json_tokener_error_size;
-#ifdef HAVE_SETLOCALE
-  free(oldlocale);
-#endif
     return NULL;
   }
 
@@ -357,7 +352,7 @@ struct json_object* json_tokener_parse_ex(struct json_tokener *tok,
 
     case json_tokener_state_inf: /* aka starts with 'i' */
       {
-	size_t size_inf;
+	int size_inf;
 	int is_negative = 0;
 
 	printbuf_memappend_fast(tok->pb, &c, 1);
@@ -375,7 +370,7 @@ struct json_object* json_tokener_parse_ex(struct json_tokener *tok,
 	{
 		if (tok->st_pos == json_inf_str_len)
 		{
-			current = json_object_new_double(is_negative ? -INFINITY : INFINITY);
+			current = json_object_new_double(is_negative ? -INFINITY : INFINITY); 
 			saved_state = json_tokener_state_finish;
 			state = json_tokener_state_eatws;
 			goto redo_char;
@@ -541,7 +536,7 @@ struct json_object* json_tokener_parse_ex(struct json_tokener *tok,
 	  /* Handle a 4-byte sequence, or two sequences if a surrogate pair */
 	  while(1) {
 	    if(strchr(json_hex_chars, c)) {
-	      tok->ucs_char += ((unsigned int)jt_hexdigit(c) << ((3-tok->st_pos++)*4));
+	      tok->ucs_char += ((unsigned int)hexdigit(c) << ((3-tok->st_pos++)*4));
 	      if(tok->st_pos == 4) {
 		unsigned char unescaped_utf[4];
 
@@ -672,45 +667,10 @@ struct json_object* json_tokener_parse_ex(struct json_tokener *tok,
 	/* Advance until we change state */
 	const char *case_start = str;
 	int case_len=0;
-	int is_exponent=0;
-	int negativesign_next_possible_location=1;
 	while(c && strchr(json_number_chars, c)) {
 	  ++case_len;
-
-	  /* non-digit characters checks */
-	  /* note: since the main loop condition to get here was
-	           an input starting with 0-9 or '-', we are
-	           protected from input starting with '.' or
-	           e/E. */
-	  if (c == '.') {
-	    if (tok->is_double != 0) {
-	      /* '.' can only be found once, and out of the exponent part.
-	         Thus, if the input is already flagged as double, it
-	         is invalid. */
-	      tok->err = json_tokener_error_parse_number;
-	      goto out;
-	    }
+	  if(c == '.' || c == 'e' || c == 'E')
 	    tok->is_double = 1;
-	  }
-	  if (c == 'e' || c == 'E') {
-	    if (is_exponent != 0) {
-	      /* only one exponent possible */
-	      tok->err = json_tokener_error_parse_number;
-	      goto out;
-	    }
-	    is_exponent = 1;
-	    tok->is_double = 1;
-	    /* the exponent part can begin with a negative sign */
-	    negativesign_next_possible_location = case_len + 1;
-	  }
-	  if (c == '-' && case_len != negativesign_next_possible_location) {
-	    /* If the negative sign is not where expected (ie
-	       start of input or start of exponent part), the
-	       input is invalid. */
-	    tok->err = json_tokener_error_parse_number;
-	    goto out;
-	  }
-
 	  if (!ADVANCE_CHAR(str, tok) || !PEEK_CHAR(c, tok)) {
 	    printbuf_memappend_fast(tok->pb, case_start, case_len);
 	    goto out;
@@ -901,7 +861,7 @@ struct json_object* json_tokener_parse_ex(struct json_tokener *tok,
 
 #ifdef HAVE_SETLOCALE
   setlocale(LC_NUMERIC, oldlocale);
-  free(oldlocale);
+  if (oldlocale) free(oldlocale);
 #endif
 
   if (tok->err == json_tokener_success)

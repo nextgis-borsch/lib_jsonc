@@ -67,6 +67,9 @@ check_function_exists(vsyslog HAVE_VSYSLOG)
 check_function_exists(strncasecmp HAVE_STRNCASECMP)
 check_function_exists(snprintf HAVE_SNPRINTF)
 
+CHECK_SYMBOL_EXISTS(INFINITY math.h HAVE_DECL_INFINITY)
+CHECK_SYMBOL_EXISTS(NAN math.h HAVE_DECL_NAN)
+
 configure_file(${CMAKE_SOURCE_DIR}/cmake/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h @ONLY)
 configure_file(${CMAKE_SOURCE_DIR}/cmake/json_config.h.in ${CMAKE_CURRENT_BINARY_DIR}/json_config.h @ONLY)
 configure_file(${CMAKE_SOURCE_DIR}/cmake/uninstall.cmake.in ${CMAKE_BINARY_DIR}/cmake_uninstall.cmake IMMEDIATE @ONLY)

@@ -20,6 +20,7 @@
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
 
+#include "bits.h"
 #include "arraylist.h"
 
 struct array_list*
@@ -62,9 +63,7 @@ static int array_list_expand_internal(struct array_list *arr, int max)
   int new_size;
 
   if(max < arr->size) return 0;
-  new_size = arr->size << 1;
-  if (new_size < max)
-    new_size = max;
+  new_size = json_max(arr->size << 1, max);
   if(!(t = realloc(arr->array, new_size*sizeof(void*)))) return -1;
   arr->array = (void**)t;
   (void)memset(arr->array + arr->size, 0, (new_size-arr->size)*sizeof(void*));
@@ -91,14 +90,8 @@ array_list_add(struct array_list *arr, void *data)
 void
 array_list_sort(struct array_list *arr, int(*sort_fn)(const void *, const void *))
 {
-  qsort(arr->array, arr->length, sizeof(arr->array[0]), sort_fn);
-}
-
-void* array_list_bsearch(const void **key, struct array_list *arr,
-		int (*sort_fn)(const void *, const void *))
-{
-	return bsearch(key, arr->array, arr->length, sizeof(arr->array[0]),
-			sort_fn);
+  qsort(arr->array, arr->length, sizeof(arr->array[0]),
+	(int (*)(const void *, const void *))sort_fn);
 }
 
 int
