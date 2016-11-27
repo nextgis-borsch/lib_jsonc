@@ -16,6 +16,8 @@
 #ifndef _printbuf_h_
 #define _printbuf_h_
 
+#include "json_object.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -26,7 +28,7 @@ struct printbuf {
   int size;
 };
 
-extern struct printbuf*
+EXTERN struct printbuf*
 printbuf_new(void);
 
 /* As an optimization, printbuf_memappend_fast is defined as a macro
@@ -36,7 +38,7 @@ printbuf_new(void);
  * Your code should not use printbuf_memappend directly--use
  * printbuf_memappend_fast instead.
  */
-extern int
+EXTERN int
 printbuf_memappend(struct printbuf *p, const char *buf, int size);
 
 #define printbuf_memappend_fast(p, bufptr, bufsize)          \
@@ -58,16 +60,16 @@ do {                                                         \
  *
  * If offset is -1, this starts at the end of the current data in the buffer.
  */
-extern int
+EXTERN int
 printbuf_memset(struct printbuf *pb, int offset, int charvalue, int len);
 
-extern int
+EXTERN int
 sprintbuf(struct printbuf *p, const char *msg, ...);
 
-extern void
+EXTERN void
 printbuf_reset(struct printbuf *p);
 
-extern void
+EXTERN void
 printbuf_free(struct printbuf *p);
 
 #ifdef __cplusplus

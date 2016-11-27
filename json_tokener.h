@@ -105,7 +105,7 @@ struct json_tokener
  *
  * @return a generic error message is returned if an invalid error value is provided.
  */
-const char *json_tokener_error_desc(enum json_tokener_error jerr);
+EXTERN const char *json_tokener_error_desc(enum json_tokener_error jerr);
 
 /**
  * Retrieve the error caused by the last call to json_tokener_parse_ex(),
@@ -118,17 +118,17 @@ const char *json_tokener_error_desc(enum json_tokener_error jerr);
  */
 enum json_tokener_error json_tokener_get_error(struct json_tokener *tok);
 
-extern struct json_tokener* json_tokener_new(void);
-extern struct json_tokener* json_tokener_new_ex(int depth);
-extern void json_tokener_free(struct json_tokener *tok);
-extern void json_tokener_reset(struct json_tokener *tok);
-extern struct json_object* json_tokener_parse(const char *str);
-extern struct json_object* json_tokener_parse_verbose(const char *str, enum json_tokener_error *error);
+EXTERN struct json_tokener* json_tokener_new(void);
+EXTERN struct json_tokener* json_tokener_new_ex(int depth);
+EXTERN void json_tokener_free(struct json_tokener *tok);
+EXTERN void json_tokener_reset(struct json_tokener *tok);
+EXTERN struct json_object* json_tokener_parse(const char *str);
+EXTERN struct json_object* json_tokener_parse_verbose(const char *str, enum json_tokener_error *error);
 
 /**
  * Set flags that control how parsing will be done.
  */
-extern void json_tokener_set_flags(struct json_tokener *tok, int flags);
+EXTERN void json_tokener_set_flags(struct json_tokener *tok, int flags);
 
 /** 
  * Parse a string and return a non-NULL json_object if a valid JSON value
@@ -198,7 +198,7 @@ if (tok->char_offset < stringlen) // XXX shouldn't access internal fields
  * @param str an string with any valid JSON expression, or portion of.  This does not need to be null terminated.
  * @param len the length of str
  */
-extern struct json_object* json_tokener_parse_ex(struct json_tokener *tok,
+EXTERN struct json_object* json_tokener_parse_ex(struct json_tokener *tok,
 						 const char *str, int len);
 
 #ifdef __cplusplus
