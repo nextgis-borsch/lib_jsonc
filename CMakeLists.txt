@@ -56,7 +56,8 @@ if(OSX_FRAMEWORK)
     set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 
     # the RPATH to be used when installing
-    set(CMAKE_INSTALL_RPATH "${INSTALL_LIB_DIR}")
+    #set(CMAKE_INSTALL_RPATH "${INSTALL_LIB_DIR}")
+    set(CMAKE_INSTALL_RPATH "@executable_path/../../../../Library/Frameworks")
 
     # don't add the automatically determined parts of the RPATH
     # which point to directories outside the build tree to the install RPATH
