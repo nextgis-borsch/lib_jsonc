@@ -50,19 +50,19 @@ if(OSX_FRAMEWORK)
     set(CMAKE_MACOSX_RPATH ON)
 
     # use, i.e. don't skip the full RPATH for the build tree
-    set(CMAKE_SKIP_BUILD_RPATH  TRUE)
+    #set(CMAKE_SKIP_BUILD_RPATH  TRUE)
 
     # when building, don't use the install RPATH already
     # (but later on when installing)
-    set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+    #set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 
     # the RPATH to be used when installing
     #set(CMAKE_INSTALL_RPATH "${INSTALL_LIB_DIR}")
-    set(CMAKE_INSTALL_RPATH "@executable_path/../../../../Library/Frameworks")
+    #set(CMAKE_INSTALL_RPATH "@executable_path/../../../../Library/Frameworks/")
 
     # don't add the automatically determined parts of the RPATH
     # which point to directories outside the build tree to the install RPATH
-    set(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
+    #set(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
 else()
     include(GNUInstallDirs)
 
@@ -78,6 +78,10 @@ check_version(JSON_C_MAJOR_VERSION JSON_C_MINOR_VERSION JSON_C_REV_VERSION)
 set(VERSION ${JSON_C_MAJOR_VERSION}.${JSON_C_MINOR_VERSION}.${JSON_C_REV_VERSION})
 
 report_version(${PROJECT_NAME} ${VERSION})
+
+if(OSX_FRAMEWORK)
+    set(FRAMEWORK_VERSION "${JSON_C_MAJOR_VERSION}")
+endif()
 
 set(PACKAGE_NAME "JSON C Library")
 set(PACKAGE_STRING "${PACKAGE_NAME} ${VERSION}")
@@ -161,7 +165,7 @@ elseif(OSX_FRAMEWORK)
     add_library(${LIB_NAME} SHARED ${CSOURCES} ${HHEADERS})
     set_target_properties(${LIB_NAME} PROPERTIES
         FRAMEWORK TRUE
-        FRAMEWORK_VERSION "${JSON_C_MAJOR_VERSION}.${JSON_C_MINOR_VERSION}"
+        FRAMEWORK_VERSION "${FRAMEWORK_VERSION}"
         MACOSX_FRAMEWORK_SHORT_VERSION_STRING ${VERSION}
         MACOSX_FRAMEWORK_BUNDLE_VERSION ${VERSION}
         MACOSX_FRAMEWORK_IDENTIFIER org.jsonc.jsonc
