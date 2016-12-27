@@ -50,6 +50,10 @@ function(check_version major minor rev)
     set(${minor} ${JSON_C_MINOR_VERSION} PARENT_SCOPE)
     set(${rev} ${JSON_C_MICRO_VERSION} PARENT_SCOPE)
 
+    # Store version string in file for installer needs
+    file(TIMESTAMP ${CMAKE_CURRENT_SOURCE_DIR}/json_c_version.h VERSION_DATETIME "%Y-%m-%d %H:%M:%S" UTC)
+    file(WRITE ${CMAKE_BINARY_DIR}/version.str "${JSON_C_MAJOR_VERSION}.${JSON_C_MINOR_VERSION}.${JSON_C_MICRO_VERSION}\n${VERSION_DATETIME}")
+
 endfunction(check_version)
 
 function(report_version name ver)
@@ -57,7 +61,7 @@ function(report_version name ver)
     string(ASCII 27 Esc)
     set(BoldYellow  "${Esc}[1;33m")
     set(ColourReset "${Esc}[m")
-        
+
     message(STATUS "${BoldYellow}${name} version ${ver}${ColourReset}")
-    
-endfunction()    
+
+endfunction()
