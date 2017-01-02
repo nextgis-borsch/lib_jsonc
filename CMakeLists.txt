@@ -171,6 +171,7 @@ elseif(OSX_FRAMEWORK)
         MACOSX_FRAMEWORK_IDENTIFIER org.jsonc.jsonc
         XCODE_ATTRIBUTE_INSTALL_PATH "@rpath"
         PUBLIC_HEADER "${HHEADERS}")
+    set_target_properties (${LIB_NAME} PROPERTIES VERSION ${VERSION})
 else()
     add_library(${LIB_NAME} ${LIB_TYPE} ${CSOURCES} ${HHEADERS})
 endif()
