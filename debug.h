@@ -10,24 +10,27 @@
  *
  */
 
+/**
+ * @file
+ * @brief Do not use, json-c internal, may be changed or removed at any time.
+ */
 #ifndef _DEBUG_H_
 #define _DEBUG_H_
 
 #include <stdlib.h>
-#include "json_object.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-EXTERN void mc_set_debug(int debug);
-EXTERN int mc_get_debug(void);
+extern void mc_set_debug(int debug);
+extern int mc_get_debug(void);
 
-EXTERN void mc_set_syslog(int syslog);
+extern void mc_set_syslog(int syslog);
 
-EXTERN void mc_debug(const char *msg, ...);
-EXTERN void mc_error(const char *msg, ...);
-EXTERN void mc_info(const char *msg, ...);
+extern void mc_debug(const char *msg, ...);
+extern void mc_error(const char *msg, ...);
+extern void mc_info(const char *msg, ...);
 
 #ifndef __STRING
 #define __STRING(x) #x

@@ -1,0 +1,4 @@
+.,.,,"c,h,ChangeLog,COPYING,INSTALL,in,NEWS,README,md,"
+autoconf-archive,autoconf-archive,skip,*
+doc,doc,skip,*
+tests,tests,,"c,h,expected,test,json"
