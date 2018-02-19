@@ -79,7 +79,7 @@ if(OSX_FRAMEWORK)
     set(FRAMEWORK_VERSION "${JSON_C_MAJOR_VERSION}")
 endif()
 
-set(PACKAGE_NAME "JSON C Library")
+set(PACKAGE_NAME "JSONC")
 set(PACKAGE_STRING "${PACKAGE_NAME} ${VERSION}")
 set(PACKAGE_TARNAME ${PROJECT_NANE})
 
@@ -245,7 +245,7 @@ add_custom_target(uninstall COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_D
 # Export package ===============================================================
 
 # Add path to includes to build-tree export
-target_include_directories(${LIB_NAME} PUBLIC
+target_include_directories(${LIB_NAME} INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
 )
