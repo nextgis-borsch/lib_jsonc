@@ -171,7 +171,7 @@ following more specific header files:
 
 For a full list of headers see [files.html](files.html)
 
-# Json-c with modified build scripts
+# Json-c with modified build scripts for NextGIS Borsch
 
 This library has modifications in build scripts to support
 [NextGIS Borsch](https://github.com/nextgis-borsch/borsch) building system. NextGIS Borsch helps to resolve
