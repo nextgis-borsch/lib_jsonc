@@ -86,6 +86,7 @@ set(PACKAGE_TARNAME ${PROJECT_NANE})
 # setup paths
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/config)
 
 if(MSVC)
     if(CMAKE_C_COMPILER_VERSION VERSION_LESS "18.0.31101.0")
