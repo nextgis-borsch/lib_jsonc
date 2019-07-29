@@ -3,8 +3,8 @@
 # Purpose:  CMake build scripts
 # Author:   Dmitry Baryshnikov, polimax@mail.ru
 ################################################################################
-# Copyright (C) 2015-2018, NextGIS <info@nextgis.com>
-# Copyright (C) 2012,2013,2014-2018 Dmitry Baryshnikov
+# Copyright (C) 2015-2019, NextGIS <info@nextgis.com>
+# Copyright (C) 2012,2013,2014-2019 Dmitry Baryshnikov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -67,6 +67,10 @@ else()
     set(INSTALL_CMAKECONF_DIR ${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}/CMake CACHE INTERNAL "Installation directory for cmake config files" FORCE)
 endif()
 
+set(PACKAGE_NAME "jsonc")
+set(PACKAGE_STRING "${PACKAGE_NAME} ${VERSION}")
+set(PACKAGE_TARNAME ${PROJECT_NANE})
+
 # setup package meta-data
 include(util)
 
@@ -78,10 +82,6 @@ report_version(${PROJECT_NAME} ${VERSION})
 if(OSX_FRAMEWORK)
     set(FRAMEWORK_VERSION "${JSON_C_MAJOR_VERSION}")
 endif()
-
-set(PACKAGE_NAME "jsonc")
-set(PACKAGE_STRING "${PACKAGE_NAME} ${VERSION}")
-set(PACKAGE_TARNAME ${PROJECT_NANE})
 
 # setup paths
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
