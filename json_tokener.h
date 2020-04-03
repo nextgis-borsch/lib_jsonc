@@ -113,7 +113,7 @@ typedef struct json_tokener json_tokener;
  *
  * @return a generic error message is returned if an invalid error value is provided.
  */
-JSON_EXPORT const char *json_tokener_error_desc(enum json_tokener_error jerr);
+const char *json_tokener_error_desc(enum json_tokener_error jerr);
 
 /**
  * Retrieve the error caused by the last call to json_tokener_parse_ex(),

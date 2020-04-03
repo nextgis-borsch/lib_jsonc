@@ -15,8 +15,8 @@ Build Status
 * [AppVeyor Build](https://ci.appveyor.com/project/hawicz/json-c) ![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/json-c/json-c?branch=master&svg=true)
 * [Travis Build](https://travis-ci.org/json-c/json-c) ![Travis Build Status](https://travis-ci.org/json-c/json-c.svg?branch=master)
 
-JSON-C implements a reference counting object model that allows you to easily
-construct JSON objects in C, output them as JSON formatted strings and parse
+JSON-C implements a reference counting object model that allows you to easily 
+construct JSON objects in C, output them as JSON formatted strings and parse 
 JSON formatted strings back into the C representation of JSON objects.
 It aims to conform to [RFC 7159](https://tools.ietf.org/html/rfc7159).
 
@@ -171,10 +171,3 @@ following more specific header files:
 
 For a full list of headers see [files.html](files.html)
 
-# Json-c with modified build scripts for NextGIS Borsch
-
-This library has modifications in build scripts to support
-[NextGIS Borsch](https://github.com/nextgis-borsch/borsch) building system. NextGIS Borsch helps to resolve
-dependencies of building C/C++ libraries and applications. NextGIS Borsch is based on [CMake](https://cmake.org/).
-
-[![Borsch compatible](https://img.shields.io/badge/Borsch-compatible-orange.svg?style=flat)](https://github.com/nextgis-borsch/borsch)
