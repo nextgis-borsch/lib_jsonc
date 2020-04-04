@@ -40,7 +40,7 @@ extern "C" {
  *
  * Returns -1 if something fails.  See json_util_get_last_err() for details.
  */
-extern struct json_object* json_object_from_file(const char *filename);
+JSON_EXPORT struct json_object* json_object_from_file(const char *filename);
 
 /**
  * Create a JSON object from already opened file descriptor.
@@ -52,7 +52,7 @@ extern struct json_object* json_object_from_file(const char *filename);
  *
  * Returns -1 if something fails.  See json_util_get_last_err() for details.
  */
-extern struct json_object* json_object_from_fd(int fd);
+JSON_EXPORT struct json_object* json_object_from_fd(int fd);
 
 /**
  * Equivalent to:
@@ -60,7 +60,7 @@ extern struct json_object* json_object_from_fd(int fd);
  *
  * Returns -1 if something fails.  See json_util_get_last_err() for details.
  */
-extern int json_object_to_file(const char *filename, struct json_object *obj);
+JSON_EXPORT int json_object_to_file(const char *filename, struct json_object *obj);
 
 /**
  * Open and truncate the given file, creating it if necessary, then
@@ -68,7 +68,7 @@ extern int json_object_to_file(const char *filename, struct json_object *obj);
  *
  * Returns -1 if something fails.  See json_util_get_last_err() for details.
  */
-extern int json_object_to_file_ext(const char *filename, struct json_object *obj, int flags);
+JSON_EXPORT int json_object_to_file_ext(const char *filename, struct json_object *obj, int flags);
 
 /**
  * Convert the json_object to a string and write it to the file descriptor.
@@ -80,7 +80,7 @@ extern int json_object_to_file_ext(const char *filename, struct json_object *obj
  * @param flags flags to pass to json_object_to_json_string_ext()
  * @return -1 if something fails.  See json_util_get_last_err() for details.
  */
-extern int json_object_to_fd(int fd, struct json_object *obj, int flags);
+JSON_EXPORT int json_object_to_fd(int fd, struct json_object *obj, int flags);
 
 /**
  * Return the last error from various json-c functions, including:
@@ -90,14 +90,14 @@ extern int json_object_to_fd(int fd, struct json_object *obj, int flags);
 const char *json_util_get_last_err(void);
 
 
-extern int json_parse_int64(const char *buf, int64_t *retval);
-extern int json_parse_double(const char *buf, double *retval);
+JSON_EXPORT int json_parse_int64(const char *buf, int64_t *retval);
+JSON_EXPORT int json_parse_double(const char *buf, double *retval);
 
 /**
  * Return a string describing the type of the object.
  * e.g. "int", or "object", etc...
  */
-extern const char *json_type_to_name(enum json_type o_type);
+JSON_EXPORT const char *json_type_to_name(enum json_type o_type);
 
 #ifdef __cplusplus
 }

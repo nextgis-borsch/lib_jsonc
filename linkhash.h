@@ -178,7 +178,7 @@ for(entry = table->head; entry && ((tmp = entry->next) || 1); entry = tmp)
  * @return On success, a pointer to the new linkhash table is returned.
  * 	On error, a null pointer is returned.
  */
-extern struct lh_table* lh_table_new(int size,
+JSON_EXPORT struct lh_table* lh_table_new(int size,
 				     lh_entry_free_fn *free_fn,
 				     lh_hash_fn *hash_fn,
 				     lh_equal_fn *equal_fn);
@@ -191,7 +191,7 @@ extern struct lh_table* lh_table_new(int size,
  * @return On success, a pointer to the new linkhash table is returned.
  * 	On error, a null pointer is returned.
  */
-extern struct lh_table* lh_kchar_table_new(int size,
+JSON_EXPORT struct lh_table* lh_kchar_table_new(int size,
 					   lh_entry_free_fn *free_fn);
 
 
@@ -203,7 +203,7 @@ extern struct lh_table* lh_kchar_table_new(int size,
  * @return On success, a pointer to the new linkhash table is returned.
  * 	On error, a null pointer is returned.
  */
-extern struct lh_table* lh_kptr_table_new(int size,
+JSON_EXPORT struct lh_table* lh_kptr_table_new(int size,
 					  lh_entry_free_fn *free_fn);
 
 
@@ -215,7 +215,7 @@ extern struct lh_table* lh_kptr_table_new(int size,
  *
  * @param t table to free.
  */
-extern void lh_table_free(struct lh_table *t);
+JSON_EXPORT void lh_table_free(struct lh_table *t);
 
 
 /**
@@ -228,7 +228,7 @@ extern void lh_table_free(struct lh_table *t);
  * @return On success, <code>0</code> is returned.
  * 	On error, a negative value is returned.
  */
-extern int lh_table_insert(struct lh_table *t, const void *k, const void *v);
+JSON_EXPORT int lh_table_insert(struct lh_table *t, const void *k, const void *v);
 
 
 /**
@@ -245,7 +245,7 @@ extern int lh_table_insert(struct lh_table *t, const void *k, const void *v);
  * @param opts if set to JSON_C_OBJECT_KEY_IS_CONSTANT, sets lh_entry.k_is_constant
  *             so t's free function knows to avoid freeing the key.
  */
-extern int lh_table_insert_w_hash(struct lh_table *t, const void *k, const void *v, const unsigned long h, const unsigned opts);
+JSON_EXPORT int lh_table_insert_w_hash(struct lh_table *t, const void *k, const void *v, const unsigned long h, const unsigned opts);
 
 
 /**
@@ -255,7 +255,7 @@ extern int lh_table_insert_w_hash(struct lh_table *t, const void *k, const void 
  * @param k a pointer to the key to lookup
  * @return a pointer to the record structure of the value or NULL if it does not exist.
  */
-extern struct lh_entry* lh_table_lookup_entry(struct lh_table *t, const void *k);
+JSON_EXPORT struct lh_entry* lh_table_lookup_entry(struct lh_table *t, const void *k);
 
 /**
  * Lookup a record in the table using a precalculated key hash.
@@ -269,7 +269,7 @@ extern struct lh_entry* lh_table_lookup_entry(struct lh_table *t, const void *k)
  * @param h hash value of the key to lookup
  * @return a pointer to the record structure of the value or NULL if it does not exist.
  */
-extern struct lh_entry* lh_table_lookup_entry_w_hash(struct lh_table *t, const void *k, const unsigned long h);
+JSON_EXPORT struct lh_entry* lh_table_lookup_entry_w_hash(struct lh_table *t, const void *k, const unsigned long h);
 
 /**
  * Lookup a record into the table.
@@ -289,7 +289,7 @@ THIS_FUNCTION_IS_DEPRECATED(extern const void* lh_table_lookup(struct lh_table *
  * @param v a pointer to a where to store the found value (set to NULL if it doesn't exist).
  * @return whether or not the key was found
  */
-extern json_bool lh_table_lookup_ex(struct lh_table *t, const void *k, void **v);
+JSON_EXPORT json_bool lh_table_lookup_ex(struct lh_table *t, const void *k, void **v);
 
 /**
  * Delete a record from the table.
@@ -301,7 +301,7 @@ extern json_bool lh_table_lookup_ex(struct lh_table *t, const void *k, void **v)
  * @return 0 if the item was deleted.
  * @return -1 if it was not found.
  */
-extern int lh_table_delete_entry(struct lh_table *t, struct lh_entry *e);
+JSON_EXPORT int lh_table_delete_entry(struct lh_table *t, struct lh_entry *e);
 
 
 /**
@@ -314,9 +314,9 @@ extern int lh_table_delete_entry(struct lh_table *t, struct lh_entry *e);
  * @return 0 if the item was deleted.
  * @return -1 if it was not found.
  */
-extern int lh_table_delete(struct lh_table *t, const void *k);
+JSON_EXPORT int lh_table_delete(struct lh_table *t, const void *k);
 
-extern int lh_table_length(struct lh_table *t);
+JSON_EXPORT int lh_table_length(struct lh_table *t);
 
 /**
  * Prints a message to <code>stdout</code>,
