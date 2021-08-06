@@ -19,7 +19,13 @@ my_array=
 	[2]=3
 	[3]=null
 	[4]=5
-my_array.to_string()=[1,2,3,null,5]
+my_array.to_string()=[
+  1,
+  2,
+  3,
+  null,
+  5
+]
 my_array=
 	[0]=1
 	[1]=2
@@ -60,14 +66,26 @@ my_array=
 	[2]=2
 	[3]=null
 	[4]=0
-my_array.to_string()=[3,1,2,null,0]
+my_array.to_string()=[
+  3,
+  1,
+  2,
+  null,
+  0
+]
 my_array=
 	[0]=null
 	[1]=0
 	[2]=1
 	[3]=2
 	[4]=3
-my_array.to_string()=[null,0,1,2,3]
+my_array.to_string()=[
+  null,
+  0,
+  1,
+  2,
+  3
+]
 find json_object(1) in my_array successfully: 1
 baz_obj.to_string()="fark"
 my_object=
@@ -75,4 +93,9 @@ my_object=
 	foo: "bar"
 	bool0: false
 	bool1: true
-my_object.to_string()={"abc":12,"foo":"bar","bool0":false,"bool1":true}
+my_object.to_string()={
+  "abc": 12,
+  "foo": "bar",
+  "bool0": false,
+  "bool1": true
+}

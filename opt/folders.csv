@@ -1,4 +1,5 @@
 .,.,,"c,h,ChangeLog,COPYING,INSTALL,in,NEWS,README,md,"
 autoconf-archive,autoconf-archive,skip,*
+cmake,cmake,,"config.h.in,json_config.h.in"
 doc,doc,skip,*
 tests,tests,,"c,h,expected,test,json"
