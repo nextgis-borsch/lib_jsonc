@@ -1,9 +1,4 @@
-# CMake 3.9 was released in 2017/07
-#  As of 2023, many versions of Linux, NetBSD and FreeBSD provide,
-#   and many OpenWRT packages require, much newer CMake packages.
-#  We're stopping before 3.10 because that version starts requiring
-#   c++11, which isn't available on e.g HPUX.
-cmake_minimum_required(VERSION 3.9...3.12)
+cmake_minimum_required(VERSION 3.16.3)
 
 # JSON-C library is C only project.
 # PROJECT_VERSION{,_MAJOR,_MINOR,_PATCH} set by project():
@@ -23,9 +18,9 @@ set(CPACK_PACKAGE_NAME              "${PROJECT_NAME}")
 set(CPACK_PACKAGE_VERSION_MAJOR     "${PROJECT_VERSION_MAJOR}")
 set(CPACK_PACKAGE_VERSION_MINOR     "${PROJECT_VERSION_MINOR}")
 set(CPACK_PACKAGE_VERSION_PATCH     "${PROJECT_VERSION_PATCH}")
+set(CPACK_GENERATOR "ZIP")
 set(JSON_C_BUGREPORT                "json-c@googlegroups.com")
 set(CPACK_SOURCE_IGNORE_FILES
-        ${PROJECT_SOURCE_DIR}/build
         ${PROJECT_SOURCE_DIR}/cmake-build-debug
         ${PROJECT_SOURCE_DIR}/pack
         ${PROJECT_SOURCE_DIR}/.idea
@@ -38,7 +33,7 @@ include(CheckIncludeFile)
 include(CheckIncludeFiles)
 include(CheckCSourceCompiles)
 include(CheckTypeSize)
-include(CPack)
+#include(CPack)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
@@ -451,17 +446,6 @@ include_directories(${PROJECT_BINARY_DIR})
 
 add_subdirectory(doc)
 
-# "uninstall" custom target for make generators in unix like operating systems
-# and if that target is not present
-if (CMAKE_GENERATOR STREQUAL "Unix Makefiles")
-    if(NOT TARGET uninstall)
-        add_custom_target(uninstall
-                COMMAND cat ${PROJECT_BINARY_DIR}/install_manifest.txt | xargs rm
-                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-                )
-    endif()
-endif()
-
 # XXX for a normal full distribution we'll need to figure out
 # XXX how to build both shared and static libraries.
 # Probably leverage that to build a local VALGRIND=1 library for testing too.
@@ -507,72 +491,6 @@ if (BUILD_STATIC_LIBS AND BUILD_SHARED_LIBS)
     list(APPEND CMAKE_TARGETS ${STATIC_LIB})
 endif ()
 
-# Always create new install dirs with 0755 permissions, regardless of umask
-set(CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS
-	OWNER_READ
-	OWNER_WRITE
-	OWNER_EXECUTE
-	GROUP_READ
-	GROUP_EXECUTE
-	WORLD_READ
-	WORLD_EXECUTE
-   )
-
-install(TARGETS ${CMAKE_TARGETS}
-    EXPORT ${PROJECT_NAME}-targets
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} ${CMAKE_INSTALL_INCLUDEDIR}/json-c
-)
-
-install(EXPORT ${PROJECT_NAME}-targets
-    FILE ${PROJECT_NAME}-targets.cmake
-    NAMESPACE ${PROJECT_NAME}::
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
-)
-
-configure_package_config_file(
-    "cmake/Config.cmake.in"
-    ${PROJECT_BINARY_DIR}/${PROJECT_NAME}-config.cmake
-    INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}"
-)
-
-install(
-    FILES ${PROJECT_BINARY_DIR}/${PROJECT_NAME}-config.cmake
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
-)
-
-    SET(prefix ${CMAKE_INSTALL_PREFIX})
-    # exec_prefix is prefix by default and CMake does not have the
-    # concept.
-    SET(exec_prefix ${CMAKE_INSTALL_PREFIX})
-    SET(libdir ${CMAKE_INSTALL_FULL_LIBDIR})
-    SET(includedir ${CMAKE_INSTALL_FULL_INCLUDEDIR})
-    SET(VERSION ${PROJECT_VERSION})
-
-	# Linking against the static json-c requires
-	# dependent packages to include additional libs:
-	SET(LIBS_LIST ${CMAKE_REQUIRED_LIBRARIES})
-
-	# Note: We would need cmake >= 3.12 in order to use list(TRANSFORM ...)
-	function(list_transform_prepend var prefix)
-		set(temp "")
-		foreach(f ${${var}})
-			list(APPEND temp "${prefix}${f}")
-		endforeach()
-		set(${var} "${temp}" PARENT_SCOPE)
-	endfunction()
-	list_transform_prepend(LIBS_LIST "-l")
-
-	string(REPLACE ";" " " LIBS "${LIBS_LIST}")
-
-    configure_file(json-c.pc.in json-c.pc @ONLY)
-    set(INSTALL_PKGCONFIG_DIR "${CMAKE_INSTALL_LIBDIR}/pkgconfig" CACHE PATH "Installation directory for pkgconfig (.pc) files")
-    install(FILES ${PROJECT_BINARY_DIR}/json-c.pc DESTINATION "${INSTALL_PKGCONFIG_DIR}")
-
-install(FILES ${JSON_C_PUBLIC_HEADERS} DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR}/json-c)
-
 if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING AND
    (NOT MSVC OR NOT (MSVC_VERSION LESS 1800)) # Tests need at least VS2013
    )
@@ -585,3 +503,11 @@ if (NOT MSVC)  # cmd line apps don't built on Windows currently.
 add_subdirectory(apps)
 endif()
 endif()
+
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/borsch/cmake/packaging.cmake)
+create_borsch_package(${PROJECT_NAME}
+    VENDOR NextGIS
+    VERSION ${PROJECT_VERSION}
+    TARGETS ${CMAKE_TARGETS}
+    HEADERS ${JSON_C_PUBLIC_HEADERS}
+)
