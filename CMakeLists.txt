@@ -4,6 +4,10 @@ cmake_minimum_required(VERSION 3.16.3)
 # PROJECT_VERSION{,_MAJOR,_MINOR,_PATCH} set by project():
 project(json-c LANGUAGES C VERSION 0.18)
 
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/borsch/cmake/version.cmake)
+report_version(json-c ${PROJECT_VERSION})
+write_version(${CMAKE_CURRENT_SOURCE_DIR}/ChangeLog 0 18 0)
+
 # set default build type if not specified by user
 if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE debug)
