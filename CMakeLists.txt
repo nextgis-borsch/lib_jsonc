@@ -37,12 +37,11 @@ include(CheckIncludeFile)
 include(CheckIncludeFiles)
 include(CheckCSourceCompiles)
 include(CheckTypeSize)
-#include(CPack)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
 option(BUILD_SHARED_LIBS  "Default to building shared libraries" ON)
-option(BUILD_STATIC_LIBS  "Default to building static libraries" ON)
+option(BUILD_STATIC_LIBS  "Default to building static libraries" OFF)
 
 if (BUILD_SHARED_LIBS)
     add_definitions(-D JSON_C_DLL)
